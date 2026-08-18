@@ -1,9 +1,13 @@
-# Casino des Incidències · Taula Nº 04
+# Casino de Incidències · Taula Nº 04
 
 Ruleta de casino europea per repartir les incidències que envia el cap
 entre els membres de l'equip. Estètica de sala privada de Montecarlo
 dels anys 60-70: fusta fosca, llautó, tapet verd i tipografia gravada.
 Tota la interfície és en català.
+
+La roda mostra **només colors** (sense números ni noms): cada membre té
+el seu color i el verd és el Jefe. La llegenda de sota la placa és la
+clau de lectura, amb el comptador de cada membre.
 
 ## Com s'obre
 

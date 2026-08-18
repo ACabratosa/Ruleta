@@ -12,9 +12,8 @@ const Fisica = (() => {
   const RD = {
     ext: 0.985, llautoInt: 0.912, pistaInt: 0.822, bola: 0.870,
     davantalInt: 0.728, deflector: 0.778,
-    nomExt: 0.722, nomInt: 0.548,
-    cellaExt: 0.548, cellaInt: 0.388, num: 0.478, repos: 0.452,
-    con: 0.388, torreta: 0.26, eix: 0.104,
+    cellaExt: 0.722, cellaInt: 0.400, repos: 0.545,
+    con: 0.400, torreta: 0.27, eix: 0.108,
   };
 
   /* ─── utilitats de perfil ───
@@ -48,33 +47,45 @@ const Fisica = (() => {
      les quatre fases posen la sensació, la restricció d'integral
      garanteix el resultat. Cap correcció a l'últim fotograma. */
   function plaTirada(W0, roda, idxObjectiu, durada) {
-    const T = durada;
-    const tAssentament = T * 0.80;
-    const Tb = U.clamp(T * 0.135, 1.05, 1.55);       // fase de rebots
+    /* Cada tirada surt diferent: la durada balla una mica, la bola surt
+       amb una EMPENTA aleatòria dins d'una banda sempre ràpida, i
+       l'energia residual del primer impacte decideix quant viatja
+       després — de gairebé res a més de deu caselles. */
+    const T = durada * U.visual(0.94, 1.07);
     const pas = roda.pas;
 
-    /* — roda: arrenca en 0,45 s i frena amb desacceleració quasi constant — */
+    /* — roda: arrenca en 0,45 s, frena quasi constant, i el nombre de
+       voltes balla prou perquè mai no s'aturi a la mateixa posició — */
     const perfilRoda = creaPerfil(x => Math.min(1, x / 0.045) * Math.pow(1 - x, 1.25) + 0.0001);
-    const voltesRoda = 2.1 + T * 0.11 + U.visual(-0.15, 0.15);
+    const voltesRoda = 2.0 + T * 0.11 + U.visual(-0.45, 0.45);
     const LW = -U.TAU * voltesRoda;                   // la roda gira antihorari
     const angleRoda = t => W0 + LW * perfilRoda.pos(U.clamp(t / T, 0, 1));
     const velRoda = t => LW * perfilRoda.vel(U.clamp(t / T, 0, 1)) / T;
 
-    /* — fase de rebots (espai relatiu a la roda) —
-       la bola llisca i salta caselles senceres fins a quedar EXACTA
-       al centre de la casella decidida */
-    const nSalts = 2 + (Math.random() < 0.4 ? 1 : 0);
-    const lliscada = pas * U.visual(0.9, 1.7);
-    const marge = lliscada + nSalts * pas;            // recorregut relatiu de la fase
+    /* — llançament: sempre ràpid, mai idèntic — */
+    const empenta = U.visual(0.85, 1.45);
+    /* energia residual al primer contacte: creix amb l'empenta i duu
+       el seu propi atzar (el mateix cop de mà no cau mai igual) */
+    const energia = U.clamp((empenta - 0.85) * 1.9 + U.visual(-0.15, 0.5), 0, 1.7);
+
+    /* — recorregut DESPRÉS del contacte, funció de l'energia:
+       lliscada ∝ energia² (com l'energia cinètica) + salts sencers — */
+    const nSalts = Math.max(0, Math.min(4, Math.round(energia * 2.3 + U.visual(-0.7, 0.7))));
+    const lliscada = pas * (0.2 + energia * energia * 3.2 + U.visual(0, 0.9));
+    const marge = lliscada + nSalts * pas;            // recorregut relatiu total
     const relObjectiu = idxObjectiu * pas;            // angle local del centre decidit
 
-    /* — fase de pista: perfil sostingut al principi, caiguda marcada al final
-       (mai un easeOut clàssic: arribaria mort al moment de caure) — */
+    /* la fase de rebots dura segons el que s'ha de recórrer */
+    const tAssentament = T * 0.80;
+    const Tb = U.clamp(0.55 + (marge / pas) * 0.16 + nSalts * 0.05, 0.75, 2.6);
+
+    /* — fase de pista: perfil sostingut al principi, caiguda marcada al
+       final (mai un easeOut clàssic: arribaria mort al moment de caure) — */
     const perfilBola = creaPerfil(x => Math.pow(1 - 0.86 * x, 1.6) + 0.045);
     const B0 = PORT_ANGLE;
 
-    /* tC es retoca lleugerament perquè el primer contacte caigui a la vora
-       d'un rombe deflector real */
+    /* tC es retoca lleugerament perquè el primer contacte caigui a la
+       vora d'un rombe deflector real */
     let tC = tAssentament - Tb;
     {
       let millor = tC, distMillor = 1e9;
@@ -92,30 +103,41 @@ const Fisica = (() => {
     }
 
     /* desplaçament total de la fase de pista: tanca el bucle amb el
-       contacte exacte — β(tC) = W(tC) + relObjectiu − marge (mod 2π) */
+       contacte exacte — β(tC) = W(tC) + relObjectiu − marge (mod 2π).
+       Les voltes de la bola porten l'empenta a dins: es VEU la
+       diferència de velocitat entre tirades. */
     const relContacte = relObjectiu - marge;
     const feta = U.wrap(angleRoda(tC) + relContacte - B0);
-    const voltesBola = Math.round(4.6 + T * 0.42 + U.visual(-0.3, 0.3));
+    const voltesBola = Math.max(4, Math.round((3.4 + T * 0.40) * empenta + U.visual(-0.2, 0.2)));
     const DA = feta + U.TAU * voltesBola;             // sempre positiu: la bola va horària
 
-    /* — segments de la fase de rebots (temps absolut, espai relatiu) — */
+    /* — segments de la fase de rebots (temps absolut, espai relatiu) —
+       rebot(s) al deflector amb alçada real, lliscada que crema
+       l'energia, salts sencers de casella i un tremolor d'assentament */
     const segments = [];
     {
-      let durs = [0.18, 0.34];                        // xoc amb deflector + lliscada
-      const avanç = [lliscada * 0.55, lliscada * 0.45];
+      const durs = [], avanç = [], tipus = [];
+      durs.push(0.16 + energia * 0.05); avanç.push(lliscada * 0.42); tipus.push('rebot1');
+      const dosRebots = energia > 0.8 && Math.random() < 0.7;
+      if (dosRebots) { durs.push(0.13); avanç.push(lliscada * 0.18); tipus.push('rebot2'); }
+      durs.push(0.30 + energia * 0.08);
+      avanç.push(lliscada * (dosRebots ? 0.40 : 0.58));
+      tipus.push('lliscada');
       for (let h = 0; h < nSalts; h++) {
-        durs.push(0.34 - h * 0.05 + U.visual(-0.02, 0.02));
+        durs.push(0.32 - h * 0.045 + U.visual(-0.02, 0.02));
         avanç.push(pas);
+        tipus.push('salt');
       }
+      durs.push(0.22); avanç.push(0); tipus.push('tremolor');
       const totalDur = durs.reduce((a, b) => a + b, 0);
-      durs = durs.map(d => d * Tb / totalDur);        // normalitzem al temps de fase
-      let t0 = tC, rel = relContacte;
+      let t0 = tC, rel = relContacte, salt = 0;
       for (let s = 0; s < durs.length; s++) {
+        const d = durs[s] * Tb / totalDur;
         segments.push({
-          t0, t1: t0 + durs[s], rel0: rel, rel1: rel + avanç[s],
-          salt: s >= 2, primer: s === 0,
+          t0, t1: t0 + d, rel0: rel, rel1: rel + avanç[s],
+          tipus: tipus[s], salt: tipus[s] === 'salt' ? salt++ : 0,
         });
-        t0 += durs[s]; rel += avanç[s];
+        t0 += d; rel += avanç[s];
       }
     }
 
@@ -123,17 +145,26 @@ const Fisica = (() => {
       for (const s of segments) {
         if (t <= s.t1 || s === segments[segments.length - 1]) {
           const u = U.clamp((t - s.t0) / (s.t1 - s.t0), 0, 1);
-          const rel = U.lerp(s.rel0, s.rel1, s.salt ? u : U.easeOutQuad(u));
-          let radi, alçada = 0;
-          if (s.primer) {
-            /* rebot al deflector: surt disparada cap enfora i cau */
+          let radi = RD.repos, alçada = 0;
+          let rel = U.lerp(s.rel0, s.rel1, u);
+          if (s.tipus === 'rebot1') {
+            /* xoc amb el deflector: surt disparada enfora i AMUNT */
             const bomba = Math.sin(u * Math.PI);
-            radi = U.lerp(RD.deflector, RD.repos + 0.02, U.easeInQuad(u)) + bomba * 0.035;
-          } else if (s.salt) {
-            radi = RD.repos;
-            alçada = Math.sin(u * Math.PI) * (0.55 - 0.13 * segments.indexOf(s));
-          } else {
-            radi = U.lerp(RD.repos + 0.02, RD.repos, u);
+            rel = U.lerp(s.rel0, s.rel1, U.easeOutQuad(u));
+            radi = U.lerp(RD.deflector, RD.repos + 0.03, U.easeInQuad(u)) + bomba * 0.05;
+            alçada = Math.pow(bomba, 0.85) * (0.45 + 0.35 * energia);
+          } else if (s.tipus === 'rebot2') {
+            const bomba = Math.sin(u * Math.PI);
+            radi = RD.repos + 0.03 - u * 0.02 + bomba * 0.02;
+            alçada = bomba * (0.2 + 0.15 * energia);
+          } else if (s.tipus === 'lliscada') {
+            rel = U.lerp(s.rel0, s.rel1, U.easeOutQuad(u));
+            radi = U.lerp(RD.repos + 0.01, RD.repos, u);
+            alçada = Math.sin(u * Math.PI) * 0.05; /* rodolament viu */
+          } else if (s.tipus === 'salt') {
+            alçada = Math.sin(u * Math.PI) * (0.5 - 0.11 * s.salt);
+          } else { /* tremolor d'assentament: la bola es queda al lloc */
+            alçada = Math.abs(Math.sin(u * Math.PI * 2)) * 0.09 * (1 - u);
           }
           return { rel, radi, alçada: Math.max(0, alçada) };
         }
@@ -154,10 +185,12 @@ const Fisica = (() => {
           const vel = DA * perfilBola.vel(x) / tC;
           let radi = RD.bola - 0.004 * x;
           if (this.tCaiguda >= 0 && t >= this.tCaiguda) {
-            /* la caiguda es dispara per VELOCITAT (no per temps): el radi
-               baixa de la pista fins al deflector just al contacte */
+            /* la caiguda es dispara per VELOCITAT (no per temps): la bola
+               baixa en ESPIRAL pel davantal, amb una ondulació suau,
+               fins a arribar al deflector just al contacte */
             const u = U.clamp((t - this.tCaiguda) / Math.max(0.001, tC - this.tCaiguda), 0, 1);
-            radi = U.lerp(RD.bola, RD.deflector, U.easeInQuad(u));
+            radi = U.lerp(RD.bola, RD.deflector, U.easeInQuad(u))
+                 + Math.sin(u * Math.PI * 2.6) * 0.012 * (1 - u);
           }
           return { beta, radi, alçada: 0, velBola: vel };
         }
@@ -207,10 +240,14 @@ const Fisica = (() => {
           emesos.contacte = true;
           emet({ tipus: 'deflector', força: 1, pan, beta: pla.posicio(pla.tC + 0.001).beta });
         }
-        for (let s = 2; s < pla.segments.length; s++) {
-          if (!emesos.saltFets.has(s) && t >= pla.segments[s].t1) {
-            emesos.saltFets.add(s);
-            emet({ tipus: 'salt', força: 1 - (s - 2) * 0.25, pan });
+        for (let s = 0; s < pla.segments.length; s++) {
+          const seg = pla.segments[s];
+          if (emesos.saltFets.has(s) || t < seg.t1) continue;
+          emesos.saltFets.add(s);
+          if (seg.tipus === 'rebot2') {
+            emet({ tipus: 'deflector', força: 0.55, pan, beta: p.beta });
+          } else if (seg.tipus === 'salt') {
+            emet({ tipus: 'salt', força: 1 - seg.salt * 0.22, pan });
           }
         }
         if (!emesos.assentada && t >= pla.tAssentament) {

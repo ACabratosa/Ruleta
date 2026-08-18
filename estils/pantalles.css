@@ -1470,3 +1470,20 @@ body.mode-3d #plaRoda { display: none; }
     radial-gradient(ellipse 62% 54% at 50% 46%, rgba(255, 216, 145, .10) 0%, rgba(255, 216, 145, 0) 62%),
     radial-gradient(ellipse 120% 105% at 50% 45%, rgba(0, 0, 0, 0) 44%, rgba(2, 4, 3, .5) 78%, rgba(0, 0, 0, .9) 100%);
 }
+
+/* ─── Roda més protagonista i llegenda amb més pes ───
+   (la roda ja no duu noms ni números: la llegenda és la clau) */
+body.mode-3d.final-tirada #mon3d { transform: none; }
+#capcalera { padding-top: 8px; }
+#comptadors { padding: 4px 0 2px; }
+#placa { width: min(580px, calc(100vw - 28px)); }
+.placa-capcal { padding: 6px 22px 0; }
+.placa-camp { padding: 2px 20px 8px; }
+#zonaBoto { padding: 4px 0 8px; }
+#peu { padding: 2px 22px 8px; }
+#taula { padding: 0 6px; }
+#llegenda { gap: 9px; max-width: 230px; }
+.lleg-fila { grid-template-columns: 26px 1fr auto; padding: 8px 12px; }
+.lleg-chip { width: 26px; height: 26px; font-size: 13px; border-radius: 3px; }
+.lleg-nom { font-size: 14.5px; }
+.lleg-compt { font-size: 15px; }

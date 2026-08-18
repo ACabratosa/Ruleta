@@ -54,8 +54,13 @@ const Cine = (() => {
         { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5,
           stagger: 0.045, ease: 'power2.out', delay: 0.1 });
     },
-    /* empenta de càmera en tirar: la sala s'inclina cap a la roda */
+    /* empenta de càmera en tirar: la sala s'inclina cap a la roda.
+       En mode 3D el puls és de càmera real (l'escala CSS difuminaria). */
     preTirada() {
+      if (document.body.classList.contains('mode-3d')) {
+        Anim3D.pulsCamera(1.035);
+        return;
+      }
       if (!on) return;
       const mon = document.getElementById('mon3d');
       gsap.killTweensOf(mon);
@@ -83,6 +88,10 @@ const Cine = (() => {
     },
     /* cop de càmera sobre la roda en el moment de l'impacte */
     copCamera(fort) {
+      if (document.body.classList.contains('mode-3d')) {
+        Anim3D.pulsCamera(fort ? 1.1 : 1.06);
+        return;
+      }
       if (!on) return;
       const mon = document.getElementById('mon3d');
       gsap.killTweensOf(mon);

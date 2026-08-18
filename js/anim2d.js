@@ -20,8 +20,7 @@ const Anim = (() => {
   let midaCss = 0, escala = 1, R = 0, centre = 0;
   let roda = null;                 // model actual (generaRoda)
   let capOff = null;               // canvas fora de pantalla del cap
-  let fontsCache = null;           // mides de lletra cachejades (mai al bucle)
-  let W = -Math.PI / 2;            // angle actual de la roda (persistent)
+  let W = U.visual(0, U.TAU);      // angle inicial aleatori, després persistent
   let rafId = 0, ultimT = 0;
   let tirada = null;               // pla de la tirada en curs
   let flaixos = [];                // {angleLocal, t0}
@@ -55,9 +54,9 @@ const Anim = (() => {
       elPla.style.height = midaCss + 'px';
     };
     elPla.style.marginTop = '0px';
-    aplicaMida(Math.max(240, Math.min(caixa.width / 1.05, caixa.height / 0.66)));
+    aplicaMida(Math.max(240, Math.min(caixa.width / 1.02, caixa.height / 0.62)));
     let rect = elPla.getBoundingClientRect();
-    const f = Math.min((caixa.width * 0.99) / rect.width, (caixa.height * 0.985) / rect.height);
+    const f = Math.min((caixa.width * 0.995) / rect.width, (caixa.height * 0.995) / rect.height);
     aplicaMida(Math.max(240, midaCss * f));
     rect = elPla.getBoundingClientRect();
     /* centrem la projecció dins de l'escenari */
@@ -78,27 +77,6 @@ const Anim = (() => {
       c.height = Math.round(midaCss * dpr);
     }
     reconstrueix(roda);
-  }
-
-  /* mides de lletra: es calculen UN COP aquí, mai dins del bucle */
-  const FONT_NOMS = '"Cinzel","Palatino Linotype",Georgia,serif';
-  function calculaFonts() {
-    if (!roda) return;
-    const ctx = capOff.getContext('2d');
-    const bandaNom = (RD.nomExt - RD.nomInt) * R - R * 0.028;
-    fontsCache = { num: Math.round(R * 0.070), noms: new Map() };
-    const base = Math.round(R * 0.056);
-    const provats = new Map();
-    for (const c of roda.caselles) {
-      const nom = c.propietari ? c.propietari.nom : Estat.d.jefe.nom;
-      if (provats.has(nom)) continue;
-      let f = base;
-      ctx.font = `700 ${f}px ${FONT_NOMS}`;
-      let amp = ctx.measureText(nom.toUpperCase()).width;
-      if (amp > bandaNom) f = Math.max(7, Math.floor(f * bandaNom / amp));
-      provats.set(nom, f);
-    }
-    fontsCache.noms = provats;
   }
 
   /* ─── El bol estàtic ─── */
@@ -202,10 +180,10 @@ const Anim = (() => {
     }
 
     /* llavi d'ombra just abans del cap giratori */
-    let llavi = g.createRadialGradient(0, 0, R * (RD.nomExt - 0.004), 0, 0, R * RD.davantalInt);
+    let llavi = g.createRadialGradient(0, 0, R * (RD.cellaExt - 0.004), 0, 0, R * RD.davantalInt);
     llavi.addColorStop(0, 'rgba(0,0,0,0.62)');
     llavi.addColorStop(1, 'rgba(0,0,0,0)');
-    anell(g, R * RD.davantalInt, R * (RD.nomExt - 0.004), llavi);
+    anell(g, R * RD.davantalInt, R * (RD.cellaExt - 0.004), llavi);
 
     /* boca de llançament pneumàtic al cantell */
     g.save();
@@ -260,8 +238,8 @@ const Anim = (() => {
     const t = document.createElement('canvas');
     t.width = t.height = 12;
     const p = t.getContext('2d');
-    p.strokeStyle = p.fillStyle = 'rgba(241,231,204,0.10)';
-    p.lineWidth = 1.2;
+    p.strokeStyle = p.fillStyle = 'rgba(241,231,204,0.16)';
+    p.lineWidth = 1.5;
     const tipus = index % 4;
     p.beginPath();
     if (tipus === 0) { p.moveTo(-3, 15); p.lineTo(15, -3); p.moveTo(-3, 9); p.lineTo(9, -3); p.moveTo(3, 15); p.lineTo(15, 3); p.stroke(); }
@@ -273,10 +251,11 @@ const Anim = (() => {
     return patró;
   }
 
-  /* ─── El cap giratori, dibuixat fora de pantalla ─── */
+  /* ─── El cap giratori, dibuixat fora de pantalla ───
+     NOMÉS COLORS: cap número ni cap nom a la roda. La identitat de
+     cada color és a la llegenda; la roda queda neta i es llegeix de
+     lluny. Aquest canvas també fa de textura per a la roda 3D. */
   function dibuixaCap() {
-    /* la roda 3D reutilitza aquest canvas com a textura: es pinta
-       sempre amb un mínim de supersampling perquè no perdi nitidesa */
     const escalaCap = Math.max(escala, 2);
     capOff = document.createElement('canvas');
     capOff.width = capOff.height = Math.round(midaCss * escalaCap);
@@ -284,84 +263,33 @@ const Anim = (() => {
     g.setTransform(escalaCap, 0, 0, escalaCap, 0, 0);
     g.translate(centre, centre);
     if (!roda) return;
-    calculaFonts();
     const pas = roda.pas;
     const idxColor = new Map(Estat.d.participants.map((p, i) => [p.id, i]));
-
-    /* base del cap */
-    let base = g.createRadialGradient(0, 0, R * RD.cellaInt, 0, 0, R * RD.nomExt);
-    base.addColorStop(0, '#17100a'); base.addColorStop(1, '#0e0906');
-    anell(g, R * RD.nomExt, R * RD.cellaInt, base);
 
     for (let i = 0; i < roda.total; i++) {
       const c = roda.caselles[i];
       const a0 = i * pas - pas / 2, a1 = i * pas + pas / 2;
       const color = c.propietari ? c.propietari.color : COLOR_JEFE;
-      const nom = c.propietari ? c.propietari.nom : Estat.d.jefe.nom;
       const iPart = c.propietari ? idxColor.get(c.propietari.id) : -1;
 
-      /* franja de nom (anell exterior): el mateix color, enfosquit */
-      g.beginPath();
-      g.arc(0, 0, R * RD.nomExt, a0, a1);
-      g.arc(0, 0, R * RD.nomInt, a1, a0, true);
-      g.closePath();
-      g.fillStyle = ombreja(color, 0.82);
-      g.fill();
-      if (iPart >= 0) { g.save(); g.clip(); g.fillStyle = patroPer(iPart, g); g.fillRect(-R, -R, 2 * R, 2 * R); g.restore(); }
-
-      /* cel·la del número */
       g.beginPath();
       g.arc(0, 0, R * RD.cellaExt, a0, a1);
       g.arc(0, 0, R * RD.cellaInt, a1, a0, true);
       g.closePath();
       const grad = g.createRadialGradient(0, 0, R * RD.cellaInt, 0, 0, R * RD.cellaExt);
       grad.addColorStop(0, ombreja(color, 0.9));
-      grad.addColorStop(0.75, color);
-      grad.addColorStop(1, ombreja(color, 0.93));
+      grad.addColorStop(0.72, color);
+      grad.addColorStop(1, ombreja(color, 0.94));
       g.fillStyle = grad;
       g.fill();
       if (iPart >= 0) { g.save(); g.clip(); g.fillStyle = patroPer(iPart, g); g.fillRect(-R, -R, 2 * R, 2 * R); g.restore(); }
-      /* fons de la casella: gola on reposa la bola */
+      /* gola on reposa la bola */
       g.beginPath();
-      g.arc(0, 0, R * (RD.repos + 0.026), a0, a1);
-      g.arc(0, 0, R * (RD.repos - 0.026), a1, a0, true);
+      g.arc(0, 0, R * (RD.repos + 0.032), a0, a1);
+      g.arc(0, 0, R * (RD.repos - 0.032), a1, a0, true);
       g.closePath();
-      g.fillStyle = 'rgba(0,0,0,0.22)';
+      g.fillStyle = 'rgba(0,0,0,0.20)';
       g.fill();
-
-      /* número, amb el peu cap al centre com a la roda real */
-      g.save();
-      g.rotate(i * pas);
-      g.translate(R * RD.num, 0);
-      g.rotate(-Math.PI / 2);
-      g.font = `700 ${fontsCache.num}px Consolas,"Cascadia Mono",monospace`;
-      g.textAlign = 'center';
-      g.textBaseline = 'middle';
-      /* contorn fosc: el número aguanta sobre qualsevol color de fons */
-      g.lineJoin = 'round';
-      g.strokeStyle = 'rgba(16,10,4,0.85)';
-      g.lineWidth = Math.max(2, fontsCache.num * 0.16);
-      g.strokeText(String(c.num), 0, 0);
-      g.fillStyle = '#F8EFD6';
-      g.fillText(String(c.num), 0, 0);
-      g.restore();
-
-      /* nom alineat radialment dins la franja */
-      g.save();
-      g.rotate(i * pas);
-      const f = fontsCache.noms.get(nom) || 10;
-      g.font = `700 ${f}px ${FONT_NOMS}`;
-      g.textAlign = 'center';
-      g.textBaseline = 'middle';
-      const rMig = R * (RD.nomExt + RD.nomInt) / 2;
-      g.translate(rMig, 0);
-      g.lineJoin = 'round';
-      g.strokeStyle = 'rgba(14,9,4,0.8)';
-      g.lineWidth = Math.max(1.6, f * 0.16);
-      g.strokeText(nom.toUpperCase(), 0, 0);
-      g.fillStyle = 'rgba(250,243,222,0.98)';
-      g.fillText(nom.toUpperCase(), 0, 0);
-      g.restore();
     }
 
     /* separadors metàl·lics entre caselles, amb ombra pròpia */
@@ -369,24 +297,23 @@ const Anim = (() => {
       const b = i * pas + pas / 2;
       g.save();
       g.rotate(b);
-      const y = Math.max(1.1, R * 0.006);
+      const y = Math.max(1.2, R * 0.007);
       g.fillStyle = 'rgba(0,0,0,0.5)';
-      g.fillRect(R * RD.cellaInt, -y / 2 + R * 0.004, R * (RD.nomExt - RD.cellaInt), y);
+      g.fillRect(R * RD.cellaInt, -y / 2 + R * 0.004, R * (RD.cellaExt - RD.cellaInt), y);
       const mg = g.createLinearGradient(0, -y, 0, y);
       mg.addColorStop(0, '#ecd590'); mg.addColorStop(0.5, '#a5823a'); mg.addColorStop(1, '#57400e');
       g.fillStyle = mg;
-      g.fillRect(R * RD.cellaInt, -y / 2, R * (RD.nomExt - RD.cellaInt), y);
+      g.fillRect(R * RD.cellaInt, -y / 2, R * (RD.cellaExt - RD.cellaInt), y);
       /* cap del separador al cantell exterior */
       g.beginPath();
-      g.arc(R * RD.cellaExt, 0, y * 1.15, 0, U.TAU);
+      g.arc(R * RD.cellaExt, 0, y * 1.2, 0, U.TAU);
       g.fillStyle = '#d9ba68';
       g.fill();
       g.restore();
     }
 
-    /* filets de llautó que tanquen les bandes */
-    anellLlauto(g, R * (RD.nomExt + 0.006), R * (RD.nomExt - 0.004), 0.85);
-    anellLlauto(g, R * (RD.nomInt + 0.004), R * (RD.nomInt - 0.004), 0.55);
+    /* filets de llautó que tanquen la corona */
+    anellLlauto(g, R * (RD.cellaExt + 0.008), R * (RD.cellaExt - 0.002), 0.9);
     anellLlauto(g, R * (RD.cellaInt + 0.005), R * (RD.cellaInt - 0.005), 0.7);
 
     /* con central de llautó */
@@ -650,7 +577,7 @@ const Anim = (() => {
         const y = Math.max(1.4, R * 0.007);
         g.fillStyle = '#ffe9b0';
         g.shadowColor = '#ffd970'; g.shadowBlur = 10;
-        g.fillRect(R * RD.cellaInt, -y / 2, R * (RD.nomExt - RD.cellaInt), y);
+        g.fillRect(R * RD.cellaInt, -y / 2, R * (RD.cellaExt - RD.cellaInt), y);
       }
       g.restore();
     }

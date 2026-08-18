@@ -22,12 +22,12 @@ const Anim3D = (() => {
   let T = null, ADD = null;             // THREE i addons
   let stage, elMon, cnv;
   let renderer, escena, camera, composer, bloom;
-  let grupCap, grupBol, bola, ombraTerra;
+  let grupCap, grupBol, bola, ombraTerra, ombraBola;
   let matLlauto, matLlautoPolit, matFusta, matSeparador;
   let texCap = null, anellCap = null;
   let separadors = [], deflectors = [];
   let roda = null;
-  let W = -Math.PI / 2;
+  let W = U.visual(0, U.TAU);      // angle inicial aleatori, després persistent
   let rafId = 0, ultimT = 0;
   let tirada = null, acabaTirada = null, cbEvents = null;
   let emaFotograma = 16, degradat = false; // mitjana mòbil del cost de fotograma
@@ -53,6 +53,18 @@ const Anim3D = (() => {
       alçadaSuperficie(radi) + RB + alçada * 0.075,
       Math.sin(beta) * radi
     );
+    /* disc d'ombra: només a la zona de caselles (l'anell no rep
+       ombres reals); s'eixampla i s'esvaeix quan la bola salta */
+    if (ombraBola) {
+      const dins = radi < RD.davantalInt;
+      ombraBola.visible = dins && bola.visible;
+      if (dins) {
+        ombraBola.position.set(Math.cos(beta) * radi, -0.0485, Math.sin(beta) * radi);
+        const s = 1 + alçada * 0.7;
+        ombraBola.scale.setScalar(s);
+        ombraBola.material.opacity = 0.35 / s;
+      }
+    }
   }
 
   /* ─── textura de fusta tornejada, generada per codi ─── */
@@ -111,7 +123,7 @@ const Anim3D = (() => {
     }
 
     /* — il·luminació de sala privada — */
-    const hemi = new T.HemisphereLight(0xffe9c4, 0x123f2c, 0.85);
+    const hemi = new T.HemisphereLight(0xffe9c4, 0x123f2c, 0.75);
     escena.add(hemi);
     const focus = new T.SpotLight(0xffd9a0, 60);
     focus.position.set(0.9, 2.7, 1.3);
@@ -164,6 +176,13 @@ const Anim3D = (() => {
     bola.castShadow = true;
     bola.visible = false;
     escena.add(bola);
+    ombraBola = new T.Mesh(
+      new T.CircleGeometry(RB * 1.35, 20),
+      new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false })
+    );
+    ombraBola.rotation.x = -Math.PI / 2;
+    ombraBola.visible = false;
+    escena.add(ombraBola);
 
     /* Nota: es va provar UnrealBloomPass, però el compositor no
        conserva la transparència del llenç i la sala CSS quedava
@@ -235,13 +254,18 @@ const Anim3D = (() => {
     /* anell de caselles: la textura pintada a mà de la roda 2D */
     texCap = new T.CanvasTexture(Anim.capOffscreen());
     texCap.colorSpace = T.SRGBColorSpace;
-    texCap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    texCap.anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
     /* L'anell arriba fins a radi 1,0: així les UV de RingGeometry
        (normalitzades pel radi exterior) mostregen el canvas amb
        mapatge identitat. La zona transparent del canvas més enllà de
        l'anell de noms es retalla amb alphaTest. */
-    const matAnell = new T.MeshStandardMaterial({
-      map: texCap, metalness: 0.06, roughness: 0.52, envMapIntensity: 0.4,
+    /* L'anell de caselles va SENSE il·luminació ni mapeig tonal:
+       l'ACES dessaturava els colors cap a pastel sota el focus. Amb
+       MeshBasic + toneMapped:false la textura es veu EXACTA (com la
+       roda 2D); el volum el posen els separadors i les ombres del
+       con i de la bola és un disc de contacte. */
+    const matAnell = new T.MeshBasicMaterial({
+      map: texCap, toneMapped: false,
       transparent: true, alphaTest: 0.35,
     });
     anellCap = new T.Mesh(new T.RingGeometry(RD.eix * 0.9, 1.0, 164, 1), matAnell);
@@ -282,8 +306,8 @@ const Anim3D = (() => {
 
     /* separadors metàl·lics en relleu sobre la textura */
     if (roda) {
-      const llarg = RD.nomExt - RD.cellaInt;
-      const rMig = (RD.nomExt + RD.cellaInt) / 2;
+      const llarg = RD.cellaExt - RD.cellaInt;
+      const rMig = (RD.cellaExt + RD.cellaInt) / 2;
       const geoSep = new T.BoxGeometry(llarg, 0.005, 0.0045);
       for (let i = 0; i < roda.total; i++) {
         const b = (i + 0.5) * roda.pas;
@@ -314,7 +338,9 @@ const Anim3D = (() => {
     if (caixa.width < 40 || caixa.height < 40) return;
     elMon.style.width = Math.round(caixa.width) + 'px';
     elMon.style.height = Math.round(caixa.height) + 'px';
-    renderer.setPixelRatio(Math.min(1.8, window.devicePixelRatio || 1));
+    /* supermostreig lleuger: el llenç es veu nítid també en pantalles
+       d'1x; la degradació automàtica el retira si el maquinari pateix */
+    renderer.setPixelRatio(degradat ? 1 : Math.min(2.6, (window.devicePixelRatio || 1) * 1.3));
     renderer.setSize(Math.round(caixa.width), Math.round(caixa.height), false);
     cnv.style.width = '100%';
     cnv.style.height = '100%';
@@ -396,6 +422,16 @@ const Anim3D = (() => {
       escena.traverse(o => { if (o.material) o.material.needsUpdate = true; });
     }
 
+    /* el zoom dels últims segons és de CÀMERA (l'escala CSS difuminaria
+       el llenç): s'apropa suaument i torna en acabar */
+    {
+      const objectiu = document.body.classList.contains('final-tirada') ? 1.075 : 1;
+      const nou = camera.zoom + (objectiu - camera.zoom) * Math.min(1, dt * 3.2);
+      if (Math.abs(nou - camera.zoom) > 0.0004) {
+        camera.zoom = nou;
+        camera.updateProjectionMatrix();
+      }
+    }
     if (tirada) {
       const r = tirada.viva.pas(dt);
       W = r.W;
@@ -587,10 +623,10 @@ const Anim3D = (() => {
           const v = U.clamp((u - 0.35) / 0.55, 0, 1);
           bola.position.y -= v * 0.004;
           bola.scale.setScalar(1 - v * 0.65);
-          if (v >= 1) { bola.visible = false; bola.scale.setScalar(1); bolaAmagada = true; }
+          if (v >= 1) { bola.visible = false; ombraBola.visible = false; bola.scale.setScalar(1); bolaAmagada = true; }
         }
         if (u < 1) requestAnimationFrame(pasA);
-        else { bola.visible = false; bola.scale.setScalar(1); bolaAmagada = true; res(); }
+        else { bola.visible = false; ombraBola.visible = false; bola.scale.setScalar(1); bolaAmagada = true; res(); }
       })();
     });
   }
@@ -627,8 +663,16 @@ const Anim3D = (() => {
     });
   }
 
+  /* petit puls de zoom de càmera; el bucle el retorna a 1 tot sol */
+  function pulsCamera(z) {
+    if (!camera) return;
+    camera.zoom = z;
+    camera.updateProjectionMatrix();
+    arrencaBucle();
+  }
+
   return {
-    disponible, init, redimensiona, reconstrueix, tira,
+    disponible, init, redimensiona, reconstrueix, tira, pulsCamera,
     brillaJuntura, obreTrampa, tancaTrampa,
     esbossaBolaEnRepos: () => { ultimaCasella = -1; renderitzaUn(); },
     get roda() { return roda; },
