@@ -1,0 +1,648 @@
+/* ════════════════════════════════════════════════════════════════
+   CASINO DE INCIDÈNCIES — full d'estils
+   Sala privada, Montecarlo, anys 60-70. Fusta fosca, llautó, tapet.
+   ════════════════════════════════════════════════════════════════ */
+:root {
+  --negre0: #080706;
+  --negre1: #12100D;
+  --negre2: #1B1510;
+  --tapet0: #06291F;
+  --tapet1: #0B3D2E;
+  --llauto0: #7A5A20;
+  --llauto1: #B08D3B;
+  --llauto2: #D2B15A;
+  --llauto3: #ECD590;
+  --ivori0: #B9AA88;
+  --ivori1: #F1E7CC;
+  --tinta: #2E2417;
+  --tinta-suau: #574834;
+  --verd-jefe: #0E6B43;
+  /* tons d'ombra i intermedis: donen profunditat als materials */
+  --llauto-ombra: #3a2c08;
+  --fusta-fosca: #0d0805;
+  --fusta-clara: #3a2413;
+  --verd-jefe-fosc: #063a26;
+  --verd-jefe-brillant: #1a8a5a;
+  /* Cinzel i Cormorant Garamond via CDN; les piles de sistema queden
+     de reserva per si no hi ha connexió */
+  --f-display: "Cinzel", "Bodoni MT", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --f-cos: "Cormorant Garamond", Constantia, Cambria, Georgia, serif;
+  --f-mono: Consolas, "Cascadia Mono", monospace;
+  --tilt: 54deg;
+  --soroll: none; /* tessel·la de gra generada per codi en carregar */
+  --transicio: 220ms cubic-bezier(.4, .1, .2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--negre0);
+  color: var(--ivori1);
+  font-family: var(--f-cos);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+textarea, input { user-select: text; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button:disabled { cursor: default; }
+
+:focus { outline: none; }
+:focus-visible {
+  outline: 1px solid var(--llauto2);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ─── L'APP: la taula ─── */
+#app {
+  position: relative;
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto auto;
+  grid-template-columns: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 140% 90% at 50% 30%, var(--tapet1) 0%, var(--tapet0) 52%, #041710 74%, var(--negre0) 100%);
+}
+/* veta del tapet + gra */
+#app::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--soroll);
+  opacity: .35;
+  pointer-events: none;
+}
+/* focus càlid sobre el centre de la taula */
+.sala-vinyeta {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  background:
+    radial-gradient(ellipse 60% 52% at 50% 46%, rgba(255, 214, 140, .07) 0%, rgba(255, 214, 140, 0) 60%),
+    radial-gradient(ellipse 120% 105% at 50% 45%, rgba(0, 0, 0, 0) 42%, rgba(2, 4, 3, .55) 78%, rgba(0, 0, 0, .92) 100%);
+  animation: respiracioLlum 9s ease-in-out infinite alternate;
+}
+@keyframes respiracioLlum {
+  from { opacity: .96; }
+  to   { opacity: 1; }
+}
+.sala-gra {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: var(--soroll);
+  opacity: .22;
+  mix-blend-mode: overlay;
+}
+/* pols ambiental gairebé imperceptible */
+.sala-pols {
+  position: absolute; inset: -10%;
+  pointer-events: none;
+  z-index: 3;
+  background-image:
+    radial-gradient(1px 1px at 12% 30%, rgba(241, 231, 204, .16) 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 64%, rgba(241, 231, 204, .10) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 22%, rgba(241, 231, 204, .12) 50%, transparent 51%),
+    radial-gradient(1px 1px at 71% 51%, rgba(241, 231, 204, .09) 50%, transparent 51%),
+    radial-gradient(1px 1px at 85% 38%, rgba(241, 231, 204, .13) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 45% 82%, rgba(241, 231, 204, .07) 50%, transparent 51%),
+    radial-gradient(1px 1px at 23% 12%, rgba(241, 231, 204, .10) 50%, transparent 51%);
+  animation: derivaPols 60s linear infinite;
+  opacity: .5;
+}
+@keyframes derivaPols {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(2.5%, 4%, 0); }
+}
+
+/* ─── Capçalera: identitat de la casa ─── */
+#capcalera {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 14px 20px 2px;
+}
+.identitat { text-align: center; }
+.casa {
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: clamp(19px, 2.6vw, 27px);
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  text-indent: .34em;
+  color: var(--ivori1);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .8), 0 0 26px rgba(210, 177, 90, .16);
+}
+.sala-linia {
+  margin-top: 3px;
+  font-family: var(--f-display);
+  font-size: 10.5px;
+  letter-spacing: .42em;
+  text-indent: .42em;
+  color: var(--llauto2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.rombe {
+  width: 4px; height: 4px;
+  background: var(--llauto1);
+  transform: rotate(45deg);
+  box-shadow: 0 0 4px rgba(210, 177, 90, .5);
+}
+.lema {
+  margin-top: 5px;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ivori0);
+  opacity: .62;
+  letter-spacing: .04em;
+}
+.filet {
+  height: 1px;
+  align-self: center;
+  margin-top: 8px;
+  background: linear-gradient(90deg, transparent, rgba(176, 141, 59, .55) 45%, rgba(176, 141, 59, .55) 55%, transparent);
+}
+.filet-esq { background: linear-gradient(90deg, transparent 8%, rgba(176, 141, 59, .5)); margin-right: 26px; }
+.filet-dre { background: linear-gradient(270deg, transparent 8%, rgba(176, 141, 59, .5)); margin-left: 26px; }
+
+/* botó de silenci: medalló de llautó */
+#btnSilenci {
+  position: absolute;
+  top: 14px; right: 16px;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, #d8b862 0%, #b08d3b 42%, #6e5220 100%);
+  border: 1px solid #55400f;
+  box-shadow: inset 0 1px 1px rgba(255, 240, 200, .55), 0 2px 6px rgba(0, 0, 0, .65);
+  display: grid;
+  place-items: center;
+  transition: filter var(--transicio);
+}
+#btnSilenci:hover { filter: brightness(1.12); }
+#btnSilenci svg { width: 19px; height: 19px; }
+#btnSilenci .ico-so { fill: #3a2c10; }
+#btnSilenci .ico-ones { fill: none; stroke: #3a2c10; stroke-width: 1.7; stroke-linecap: round; }
+#btnSilenci .ico-creu { stroke: #5c1414; stroke-width: 2.4; stroke-linecap: round; display: none; }
+#btnSilenci.silenciat .ico-ones { display: none; }
+#btnSilenci.silenciat .ico-creu { display: block; }
+
+/* ─── Comptadors de sessió i incidència ─── */
+#comptadors {
+  position: relative;
+  z-index: 6;
+  text-align: center;
+  padding: 7px 0 4px;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  letter-spacing: .3em;
+  color: var(--ivori0);
+}
+.compt-etiqueta { opacity: .62; font-size: 10.5px; }
+.compt-xifra { color: var(--llauto2); text-shadow: 0 0 10px rgba(210, 177, 90, .25); }
+.compt-sep { margin: 0 10px; color: var(--llauto0); }
+
+/* ─── Placa de registre de la incidència ─── */
+#placa {
+  position: relative;
+  z-index: 6;
+  justify-self: center;
+  width: min(640px, calc(100vw - 28px));
+  margin-top: 4px;
+}
+.placa-cos {
+  position: relative;
+  border-radius: 3px;
+  padding: 7px;
+  background:
+    var(--soroll),
+    linear-gradient(172deg, #241a11 0%, #180f0a 38%, #241a10 74%, #120b07 100%);
+  background-blend-mode: overlay, normal;
+  box-shadow:
+    0 1px 0 rgba(120, 90, 40, .18) inset,
+    0 14px 30px -12px rgba(0, 0, 0, .85),
+    0 3px 8px rgba(0, 0, 0, .55);
+  border: 1px solid rgba(0, 0, 0, .85);
+}
+/* placa interior de llautó */
+.placa-cos::before {
+  content: '';
+  position: absolute; inset: 7px;
+  border-radius: 2px;
+  background:
+    linear-gradient(168deg, #86691f 0%, #b6923e 26%, #d9ba68 44%, #a9863a 66%, #6c5118 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 244, 210, .5),
+    inset 0 -2px 5px rgba(43, 30, 6, .75),
+    inset 0 0 40px rgba(70, 50, 10, .28);
+}
+.placa-cos::after { /* pàtina */
+  content: '';
+  position: absolute; inset: 7px;
+  border-radius: 2px;
+  background: var(--soroll);
+  opacity: .5;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.placa-cargol {
+  position: absolute;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e7cf8d, #8d6d26 55%, #4c380e);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .7), inset 0 -1px 1px rgba(0, 0, 0, .5);
+  z-index: 2;
+}
+.placa-cargol::before { /* ranura del cargol */
+  content: '';
+  position: absolute;
+  left: 1px; right: 1px; top: 3px;
+  height: 1px;
+  background: rgba(40, 28, 6, .8);
+  transform: rotate(37deg);
+}
+.c1 { top: 11px; left: 11px; }
+.c2 { top: 11px; right: 11px; }
+.c2::before { transform: rotate(-24deg); }
+.c3 { bottom: 11px; left: 11px; }
+.c3::before { transform: rotate(78deg); }
+.c4 { bottom: 11px; right: 11px; }
+.c4::before { transform: rotate(-64deg); }
+
+.placa-capcal {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 26px 0;
+}
+#placaTitol {
+  font-family: var(--f-display);
+  font-size: 12px;
+  letter-spacing: .3em;
+  color: #43310e;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, .4);
+  transition: color var(--transicio);
+}
+#placa.te-text #placaTitol { color: #2e1f06; }
+.placa-compt {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: #5c4715;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, .3);
+}
+.placa-camp { position: relative; z-index: 1; padding: 3px 24px 10px; }
+#campText {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  font-family: var(--f-cos);
+  font-size: 16.5px;
+  font-style: italic;
+  line-height: 1.4;
+  color: #2b1d08;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, .32);
+  caret-color: #4a3208;
+  padding: 4px 2px;
+  border-bottom: 1px solid rgba(62, 45, 12, .5);
+  transition: border-color var(--transicio);
+}
+#campText::placeholder { color: rgba(70, 52, 16, .55); font-style: italic; }
+#campText:focus { border-bottom-color: rgba(46, 32, 8, .85); }
+#placa.segellada #campText { border-bottom-color: transparent; }
+
+/* segell de bloqueig durant la tirada */
+#placaSegell {
+  position: absolute;
+  right: 34px; top: 58%;
+  z-index: 2;
+  transform: translateY(-50%) rotate(-7deg) scale(1.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease, transform 300ms cubic-bezier(.2, 1.6, .4, 1);
+}
+#placaSegell span {
+  display: block;
+  font-family: var(--f-display);
+  font-size: 11px;
+  letter-spacing: .3em;
+  text-indent: .3em;
+  color: #6d1a1a;
+  border: 2px solid #6d1a1a;
+  border-radius: 2px;
+  padding: 4px 8px 3px;
+  box-shadow: inset 0 0 0 1px rgba(109, 26, 26, .35);
+  mix-blend-mode: multiply;
+}
+#placa.segellada #placaSegell {
+  opacity: .85;
+  transform: translateY(-50%) rotate(-7deg) scale(1);
+}
+#placa.segellada #campText { pointer-events: none; }
+
+/* ─── La taula: escenari de la roda + llegenda ─── */
+#taula {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  min-height: 0;
+  padding: 0 10px;
+}
+#escenari {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+#mon3d {
+  perspective: 1150px;
+  perspective-origin: 50% 32%;
+  transition: transform 900ms cubic-bezier(.4, .05, .2, 1);
+}
+body.final-tirada #mon3d { transform: scale(1.055); }
+#plaRoda {
+  position: relative;
+  transform: rotateX(var(--tilt));
+  transform-style: preserve-3d;
+}
+#plaRoda canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#cnvBol { z-index: 1; }
+#cnvRoda { z-index: 2; }
+#cnvFx { z-index: 3; }
+
+/* reflex lent del llautó en repòs — CSS pur, sense bucle de dibuix */
+#reflexRepos {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(from 0deg,
+    transparent 0deg, transparent 40deg,
+    rgba(255, 236, 180, .16) 58deg, rgba(255, 246, 214, .05) 70deg,
+    transparent 88deg, transparent 196deg,
+    rgba(255, 236, 180, .07) 214deg, transparent 232deg, transparent 360deg);
+  -webkit-mask: radial-gradient(circle closest-side, transparent 0 42%, #000 44% 56%, transparent 58% 78%, #000 82% 97%, transparent 99%);
+          mask: radial-gradient(circle closest-side, transparent 0 42%, #000 44% 56%, transparent 58% 78%, #000 82% 97%, transparent 99%);
+  animation: reflexGira 16s linear infinite;
+  opacity: .8;
+}
+@keyframes reflexGira { to { transform: rotate(360deg); } }
+body.tirant #reflexRepos { display: none; }
+
+/* estrenyiment del focus als últims segons: vinyeta de tota la sala
+   centrada exactament a la roda (les coordenades les posa el codi) */
+#focusFinal {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 1000ms ease;
+  background: radial-gradient(
+    ellipse var(--focusRx, 46vmin) var(--focusRy, 36vmin)
+    at var(--focusX, 50%) var(--focusY, 60%),
+    transparent 50%, rgba(2, 4, 3, .74) 97%);
+}
+body.final-tirada #focusFinal { opacity: 1; }
+
+/* ─── Llegenda de participants: plaques al marge dret de la taula ─── */
+#llegenda {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-width: 200px;
+}
+.lleg-fila {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 10px;
+  background: linear-gradient(170deg, rgba(20, 14, 9, .82), rgba(10, 7, 5, .82));
+  border: 1px solid rgba(122, 90, 32, .38);
+  border-radius: 2px;
+  box-shadow: 0 3px 9px -4px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(210, 177, 90, .1);
+}
+.lleg-fila.absent { opacity: .42; }
+.lleg-fila.jefe-fila { margin-top: 5px; border-color: rgba(14, 107, 67, .55); }
+.lleg-chip {
+  width: 20px; height: 20px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, .6);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .22), inset 0 -2px 3px rgba(0, 0, 0, .4);
+  display: grid;
+  place-items: center;
+  font-family: var(--f-display);
+  font-size: 10px;
+  color: rgba(241, 231, 204, .9);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .7);
+}
+.lleg-nom {
+  font-family: var(--f-display);
+  font-size: 12.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ivori1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lleg-nom small {
+  display: block;
+  font-family: var(--f-cos);
+  font-size: 9px;
+  letter-spacing: .22em;
+  color: var(--ivori0);
+  opacity: .7;
+}
+.lleg-compt {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  color: var(--llauto2);
+  min-width: 2ch;
+  text-align: right;
+}
+
+/* ─── Botó de tirar: peça de llautó ─── */
+#zonaBoto {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 6px 0 10px;
+}
+.boto-base {
+  position: relative;
+  padding: 5px 7px;
+  border-radius: 4px;
+  background: linear-gradient(175deg, #221810, #0d0805);
+  box-shadow: inset 0 1px 0 rgba(150, 115, 50, .25), 0 8px 22px -8px rgba(0, 0, 0, .9);
+  border: 1px solid rgba(0, 0, 0, .9);
+}
+#btnTirar {
+  position: relative;
+  display: block;
+  min-width: 280px;
+  padding: 11px 38px 9px;
+  border-radius: 3px;
+  background:
+    linear-gradient(178deg, #caa851 0%, #b08d3b 30%, #96742c 55%, #c8a750 78%, #6e5117 100%);
+  border: 1px solid #4e390d;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 244, 208, .65),
+    inset 0 -3px 6px rgba(53, 37, 6, .6),
+    0 6px 0 #43310c,
+    0 11px 20px rgba(0, 0, 0, .65);
+  transform: translateY(0);
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 200ms ease;
+  text-align: center;
+}
+#btnTirar:hover:not(:disabled) { filter: brightness(1.09) saturate(1.05); }
+#btnTirar:active:not(:disabled),
+#btnTirar.premut:not(:disabled) {
+  transform: translateY(5px);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 244, 208, .5),
+    inset 0 -2px 4px rgba(53, 37, 6, .6),
+    0 1px 0 #43310c,
+    0 4px 8px rgba(0, 0, 0, .55);
+}
+#btnTirar:disabled {
+  filter: saturate(.55) brightness(.78);
+}
+#btnTirarText {
+  display: block;
+  font-family: var(--f-display);
+  font-size: 15.5px;
+  letter-spacing: .26em;
+  text-indent: .26em;
+  color: #33240a;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, .45);
+  white-space: nowrap;
+}
+.btn-tecla {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--f-mono);
+  font-size: 8.5px;
+  letter-spacing: .5em;
+  text-indent: .5em;
+  color: rgba(51, 36, 10, .65);
+}
+
+/* ─── Peu: registre, croupier, ajustos ─── */
+#peu {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 22px 12px;
+}
+.btn-peu {
+  font-family: var(--f-display);
+  font-size: 11.5px;
+  letter-spacing: .3em;
+  text-indent: .3em;
+  color: var(--llauto2);
+  padding: 7px 4px;
+  position: relative;
+  transition: color var(--transicio), text-shadow var(--transicio);
+}
+.btn-peu::after {
+  content: '';
+  position: absolute;
+  left: 10%; right: 10%; bottom: 3px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(176, 141, 59, .6), transparent);
+  transform: scaleX(.4);
+  opacity: 0;
+  transition: transform var(--transicio), opacity var(--transicio);
+}
+.btn-peu:hover { color: var(--llauto3); text-shadow: 0 0 12px rgba(210, 177, 90, .4); }
+.btn-peu:hover::after { transform: scaleX(1); opacity: 1; }
+#btnRegistre { justify-self: start; }
+#btnAjustos { justify-self: end; }
+#croupier {
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ivori0);
+  opacity: .78;
+  text-align: center;
+  letter-spacing: .03em;
+  transition: opacity 400ms ease;
+  min-height: 1.4em;
+}
+
+/* ─── Tremolors de pantalla ─── */
+@keyframes tremolaPetit {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-5px, 3px); }
+  40% { transform: translate(4px, -3px); }
+  60% { transform: translate(-3px, -2px); }
+  80% { transform: translate(3px, 2px); }
+}
+@keyframes tremolaFort {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  15% { transform: translate(-9px, 5px) rotate(-.35deg); }
+  30% { transform: translate(8px, -6px) rotate(.3deg); }
+  45% { transform: translate(-7px, -4px) rotate(-.25deg); }
+  60% { transform: translate(7px, 5px) rotate(.3deg); }
+  75% { transform: translate(-5px, 3px) rotate(-.2deg); }
+  90% { transform: translate(4px, -2px) rotate(.15deg); }
+}
+#app.tremola { animation: tremolaPetit 380ms ease-out; }
+#app.tremola-fort { animation: tremolaFort 650ms ease-out; }
+#app.tremola-continu { animation: tremolaPetit 300ms ease-in-out infinite; }
+body.mode-calma #app.tremola,
+body.mode-calma #app.tremola-fort,
+body.mode-calma #app.tremola-continu { animation: none; }
+
+/* llums d'emergència (escalada de la trampa) */
+#app::after {
+  content: '';
+  position: absolute; inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(140, 20, 16, .4) 100%);
+  transition: opacity 300ms ease;
+}
+body.emergencia #app::after {
+  opacity: 1;
+  animation: batecEmergencia 700ms ease-in-out infinite alternate;
+}
+body.mode-calma.emergencia #app::after { animation: none; opacity: .35; }
+@keyframes batecEmergencia {
+  from { opacity: .25; }
+  to   { opacity: 1; }
+}

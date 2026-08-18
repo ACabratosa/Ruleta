@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Casino de Incidències · Taula Nº 04</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23120f0b' stroke='%23b08d3b' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23b08d3b' stroke-width='2'/%3E%3Ccircle cx='32' cy='15' r='4' fill='%23f1e7cc'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23b08d3b'/%3E%3C/svg%3E">
+
+<!-- Dependències en línia (CDN). Si no hi ha connexió, l'aplicació
+     continua funcionant amb fonts de sistema, transicions CSS i la
+     roda en canvas 2D. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
+
+<link rel="stylesheet" href="estils/base.css">
+<link rel="stylesheet" href="estils/pantalles.css">
+
+<!-- Three.js es resol amb aquest importmap, però es carrega MANDROSAMENT
+     des de js/main.js després d'arrencar: així la pàgina apareix a
+     l'instant (roda 2D) i puja a 3D quan el mòdul arriba. Si no hi ha
+     connexió, la roda 2D es queda i res no es trenca. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<!-- filtre d'aberració cromàtica per a instants de màxima tensió -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="fAberracio" x="-2%" y="-2%" width="104%" height="104%">
+    <feOffset in="SourceGraphic" dx="1.6" dy="0" result="despR"/>
+    <feOffset in="SourceGraphic" dx="-1.6" dy="0" result="despB"/>
+    <feColorMatrix in="despR" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="soR"/>
+    <feColorMatrix in="despB" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="soB"/>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="soG"/>
+    <feBlend in="soR" in2="soG" mode="screen" result="soRG"/>
+    <feBlend in="soRG" in2="soB" mode="screen"/>
+  </filter>
+</defs></svg>
+
+<div id="app" class="croupier-idle">
+
+  <!-- Ambient de sala: llum, gra, vinyeta i fuites de llum -->
+  <div class="sala-vinyeta" aria-hidden="true"></div>
+  <div class="sala-fuita" aria-hidden="true"></div>
+  <div class="sala-gra" aria-hidden="true"></div>
+  <div class="sala-pols" aria-hidden="true"></div>
+
+  <header id="capcalera">
+    <div class="filet filet-esq" aria-hidden="true"></div>
+    <div class="identitat">
+      <h1 class="casa">Casino de Incidències</h1>
+      <div class="sala-linia"><span class="rombe" aria-hidden="true"></span> SALLE PRIVÉE · TAULA Nº 04 <span class="rombe" aria-hidden="true"></span></div>
+      <div class="lema">Les incidències no es creen. Es destinen.</div>
+    </div>
+    <div class="filet filet-dre" aria-hidden="true"></div>
+    <button id="btnSilenci" class="btn-rodo" type="button" aria-label="Silenciar el so" title="Silenciar (M)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="ico-so" d="M4 9v6h4l5 4V5L8 9H4z"/><path class="ico-ones" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><line class="ico-creu" x1="4" y1="4" x2="21" y2="21"/></svg>
+    </button>
+  </header>
+
+  <div id="comptadors" aria-live="polite">
+    <span class="compt-etiqueta">SESSIÓ</span> <span id="numSessio" class="compt-xifra">#01</span>
+    <span class="compt-sep">·</span>
+    <span class="compt-etiqueta">INCIDÈNCIA</span> <span id="numIncidencia" class="compt-xifra">#001</span>
+  </div>
+
+  <!-- Placa de registre de la incidència -->
+  <section id="placa" aria-label="Registre de la incidència">
+    <div class="placa-cos">
+      <div class="placa-cargol c1" aria-hidden="true"></div>
+      <div class="placa-cargol c2" aria-hidden="true"></div>
+      <div class="placa-cargol c3" aria-hidden="true"></div>
+      <div class="placa-cargol c4" aria-hidden="true"></div>
+      <div class="placa-capcal">
+        <span id="placaTitol">ESPERANT INCIDÈNCIA</span>
+        <span id="placaComptador" class="placa-compt">0/240</span>
+      </div>
+      <div class="placa-camp">
+        <textarea id="campText" maxlength="240" rows="1" spellcheck="false"
+          placeholder="Escriu aquí la incidència que s&#39;ha de destinar…"
+          aria-label="Descripció de la incidència"></textarea>
+      </div>
+      <div id="placaSegell" aria-hidden="true"><span>SEGELLADA</span></div>
+    </div>
+  </section>
+
+  <!-- Taula: la roda i la llegenda -->
+  <main id="taula">
+    <div id="escenari">
+      <div id="mon3d">
+        <div id="plaRoda">
+          <canvas id="cnvBol"></canvas>
+          <canvas id="cnvRoda"></canvas>
+          <canvas id="cnvFx"></canvas>
+          <div id="reflexRepos" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div id="focusFinal" aria-hidden="true"></div>
+    </div>
+
+    <aside id="llegenda" aria-label="Participants"></aside>
+  </main>
+
+  <div id="zonaBoto">
+    <div class="boto-base">
+      <button id="btnTirar" type="button" disabled>
+        <span id="btnTirarText">ESCRIU UNA INCIDÈNCIA</span>
+        <span class="btn-tecla" aria-hidden="true">SPACE</span>
+      </button>
+    </div>
+  </div>
+
+  <footer id="peu">
+    <button id="btnRegistre" class="btn-peu" type="button">REGISTRE</button>
+    <div id="croupier" aria-live="polite">Les apostes estan tancades.</div>
+    <button id="btnAjustos" class="btn-peu" type="button">AJUSTOS</button>
+  </footer>
+</div>
+
+<!-- ═══ Portada d'entrada (una vegada per càrrega, saltable) ═══ -->
+<div id="entrada" aria-hidden="true">
+  <div class="entrada-marc">
+    <div class="entrada-filet" aria-hidden="true"></div>
+    <div class="entrada-casa">Casino de Incidències</div>
+    <div class="entrada-sala">SALLE PRIVÉE · TAULA Nº 04</div>
+    <div class="entrada-filet" aria-hidden="true"></div>
+  </div>
+</div>
+
+<!-- ═══ Cortina de nova sessió ═══ -->
+<div id="cortina" aria-hidden="true">
+  <div class="cortina-marc">
+    <div class="cortina-retol">NOVA SESSIÓ</div>
+    <div class="cortina-sub"></div>
+  </div>
+</div>
+
+<!-- ═══ Banner de la trampa (escalada) ═══ -->
+<div id="bannerTrampa" aria-hidden="true">
+  <div class="banner-linia1"></div>
+  <div class="banner-linia2"></div>
+</div>
+
+<!-- ═══ Vista de tall del tub pneumàtic ═══ -->
+<div id="trampa" aria-hidden="true">
+  <div id="trampaEscena"></div>
+</div>
+
+<!-- ═══ Celebració ═══ -->
+<div id="celebracio" aria-hidden="true">
+  <div class="cel-fons"></div>
+  <div class="cel-raigs" aria-hidden="true"></div>
+  <div class="cel-carta">
+    <div class="cel-bombetes" aria-hidden="true"></div>
+    <div class="cel-interior">
+      <div id="celIncident" class="cel-incident"></div>
+      <div id="celText" class="cel-text"></div>
+      <div class="cel-separador" aria-hidden="true"></div>
+      <div id="celNom" class="cel-nom"></div>
+      <div id="celFrase" class="cel-frase"></div>
+      <div id="celRatxa" class="cel-ratxa"></div>
+      <div class="cel-odometre-zona">
+        <div class="cel-odometre-etiqueta">INCIDÈNCIES ACUMULADES</div>
+        <div id="celOdometre" class="cel-odometre"></div>
+      </div>
+    </div>
+  </div>
+  <div class="cel-tancar">clic o Esc per tornar a la taula</div>
+</div>
+<canvas id="cnvParticules" aria-hidden="true"></canvas>
+<div id="flaix" aria-hidden="true"></div>
+
+<!-- ═══ Registre de la taula ═══ -->
+<section id="pantallaRegistre" aria-hidden="true" aria-label="Registre de la taula">
+  <div class="llibre">
+    <div class="llibre-lloms" aria-hidden="true"></div>
+    <header class="llibre-capcal">
+      <div class="llibre-titol">REGISTRE DE LA TAULA</div>
+      <div class="llibre-subtitol">TAULA Nº 04</div>
+      <button id="btnTancarRegistre" class="llibre-tancar" type="button" aria-label="Tornar a la taula">TORNAR A LA TAULA</button>
+    </header>
+    <nav class="llibre-pestanyes" role="tablist">
+      <button id="pestRegistre" class="pestanya activa" role="tab" aria-selected="true" type="button">REGISTRE</button>
+      <button id="pestEstadistiques" class="pestanya" role="tab" aria-selected="false" type="button">ESTADÍSTIQUES</button>
+    </nav>
+
+    <div id="pagRegistre" class="llibre-pagina" role="tabpanel">
+      <div class="selector-sessio">
+        <button id="sessioAnt" class="sessio-fletxa" type="button" aria-label="Sessió anterior">‹</button>
+        <span class="sessio-etiqueta">SESSIÓ</span> <span id="sessioTriada" class="sessio-num">#01</span>
+        <button id="sessioSeg" class="sessio-fletxa" type="button" aria-label="Sessió següent">›</button>
+      </div>
+      <div id="registreLlista" class="registre-llista" tabindex="0"></div>
+      <div class="llibre-peu">
+        <button id="btnExportar" class="btn-llibre" type="button">EXPORTAR CSV</button>
+      </div>
+    </div>
+
+    <div id="pagEstadistiques" class="llibre-pagina" role="tabpanel" hidden>
+      <div id="statsTotals" class="stats-totals"></div>
+      <div id="statsTaula" class="stats-taula"></div>
+      <div class="records-titol">RÈCORDS DE LA TAULA</div>
+      <div id="statsRecords" class="stats-records"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Fitxa individual d'una entrada ═══ -->
+<div id="fitxa" aria-hidden="true">
+  <div class="fitxa-placa">
+    <div class="placa-cargol c1" aria-hidden="true"></div>
+    <div class="placa-cargol c2" aria-hidden="true"></div>
+    <div class="placa-cargol c3" aria-hidden="true"></div>
+    <div class="placa-cargol c4" aria-hidden="true"></div>
+    <div id="fitxaNum" class="fitxa-num"></div>
+    <div id="fitxaText" class="fitxa-text"></div>
+    <div class="fitxa-linia" aria-hidden="true"></div>
+    <div class="fitxa-camp"><span class="fitxa-etiqueta">ASSIGNADA A</span><span id="fitxaGuanyador" class="fitxa-valor"></span></div>
+    <div class="fitxa-camp" id="fitxaCadenaFila"><span class="fitxa-etiqueta">RECORREGUT</span><span id="fitxaCadena" class="fitxa-valor"></span></div>
+    <div class="fitxa-camp"><span class="fitxa-etiqueta">DATA</span><span id="fitxaData" class="fitxa-valor"></span></div>
+    <div class="fitxa-camp"><span class="fitxa-etiqueta">HORA</span><span id="fitxaHora" class="fitxa-valor"></span></div>
+    <button id="btnTancarFitxa" class="fitxa-tancar" type="button">TANCAR</button>
+  </div>
+</div>
+
+<!-- ═══ Ajustos ═══ -->
+<aside id="pantallaAjustos" aria-hidden="true" aria-label="Ajustos de la taula">
+  <div class="ajustos-panell">
+    <header class="ajustos-capcal">
+      <div class="ajustos-titol">AJUSTOS DE LA TAULA</div>
+      <button id="btnTancarAjustos" class="ajustos-tancar" type="button" aria-label="Tancar els ajustos">TANCAR</button>
+    </header>
+    <div class="ajustos-cos">
+
+      <div class="ajustos-seccio">
+        <div class="ajustos-seccio-titol">PARTICIPANTS</div>
+        <div id="llistaParticipants"></div>
+        <button id="btnAfegirParticipant" class="btn-ajust" type="button">AFEGIR PARTICIPANT</button>
+        <div id="avisParticipants" class="ajustos-avis"></div>
+      </div>
+
+      <div class="ajustos-seccio">
+        <div class="ajustos-seccio-titol">LA BANCA</div>
+        <label class="ajustos-fila">
+          <span class="ajustos-etiqueta">Nom del Jefe</span>
+          <input id="campJefe" class="camp-ajust" type="text" maxlength="14" autocomplete="off">
+        </label>
+      </div>
+
+      <div class="ajustos-seccio">
+        <div class="ajustos-seccio-titol">MECANISME</div>
+        <div class="ajustos-fila">
+          <span class="ajustos-etiqueta">Probabilitat de la trampa <span id="valProbTrampa" class="ajustos-valor"></span></span>
+          <input id="ctrlProbTrampa" class="regulador" type="range" min="3" max="10" step="1">
+        </div>
+        <div class="ajustos-fila">
+          <span class="ajustos-etiqueta">Durada de la tirada <span id="valDurada" class="ajustos-valor"></span></span>
+          <input id="ctrlDurada" class="regulador" type="range" min="8" max="12" step="0.5">
+        </div>
+        <div class="ajustos-fila commutador-fila">
+          <span class="ajustos-etiqueta">Mode calma <small>menys partícules i efectes</small></span>
+          <button id="ctrlCalma" class="commutador" type="button" role="switch" aria-checked="false"><span class="comm-pom"></span></button>
+        </div>
+      </div>
+
+      <div class="ajustos-seccio">
+        <div class="ajustos-seccio-titol">SESSIÓ</div>
+        <button id="btnNovaSessio" class="btn-ajust btn-ajust-important" type="button">OBRIR UNA SESSIÓ NOVA</button>
+        <div class="ajustos-nota">La sessió actual quedarà arxivada al registre i la numeració tornarà a #001.</div>
+      </div>
+
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ Confirmació ═══ -->
+<div id="confirmacio" aria-hidden="true" role="alertdialog" aria-modal="true">
+  <div class="confirm-placa">
+    <div id="confirmTitol" class="confirm-titol"></div>
+    <div id="confirmText" class="confirm-text"></div>
+    <div class="confirm-botons">
+      <button id="confirmCancella" class="btn-confirm" type="button">CANCEL·LAR</button>
+      <button id="confirmAccepta" class="btn-confirm btn-confirm-primari" type="button">CONFIRMAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Avís de taula (no permet tirar, RNG absent, etc.) ═══ -->
+<div id="avis" aria-hidden="true" role="status"></div>
+
+<!-- GSAP per a la coreografia d'entrades i la cinematografia.
+     Càrrega síncrona abans del codi propi; si falla (sense connexió),
+     la capa Cine detecta l'absència i cau a les transicions CSS. -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+<script src="js/util.js"></script>
+<script src="js/rng.js"></script>
+<script src="js/estat.js"></script>
+<script src="js/roda.js"></script>
+<script src="js/sorteig.js"></script>
+<script src="js/fisica.js"></script>
+<script src="js/anim2d.js"></script>
+<script src="js/anim3d.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/particules.js"></script>
+<script src="js/trampa.js"></script>
+<script src="js/celebracio.js"></script>
+<script src="js/registre.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/cine.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
