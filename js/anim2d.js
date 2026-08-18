@@ -11,17 +11,10 @@
 const Anim = (() => {
   const TILT = 54 * Math.PI / 180;      // ha de coincidir amb --tilt
   const ALT_FACTOR = Math.tan(TILT);    // desplaçament en pla que simula alçada
-  const PORT_ANGLE = -1.05;             // boca de llançament (fixa al bol)
-  const N_DEFLECTORS = 8;
-
-  /* Radis com a fracció de R */
-  const RD = {
-    ext: 0.985, llautoInt: 0.905, pistaInt: 0.80, bola: 0.853,
-    davantalInt: 0.695, deflector: 0.748,
-    nomExt: 0.688, nomInt: 0.552,
-    cellaExt: 0.552, cellaInt: 0.418, num: 0.508, repos: 0.472,
-    con: 0.418, torreta: 0.30, eix: 0.115,
-  };
+  /* geometria i física canòniques, compartides amb la roda 3D */
+  const RD = Fisica.RD;
+  const PORT_ANGLE = Fisica.PORT_ANGLE;
+  const N_DEFLECTORS = Fisica.N_DEFLECTORS;
 
   let stage, elPla, cnvBol, cnvRoda, cnvFx, xB, xR, xF;
   let midaCss = 0, escala = 1, R = 0, centre = 0;
@@ -39,30 +32,6 @@ const Anim = (() => {
   let cuaBola = [];                // rastre curt de la bola
   let cbEvents = null;
   let acabaTirada = null;
-
-  /* ─── utilitats de perfil ───
-     Mostregem un perfil de velocitat arbitrari i el normalitzem:
-     pos(1) = 1 exacte. Així el desplaçament total és EXACTAMENT el
-     que volem i la forma de la corba només posa el caràcter. */
-  function creaPerfil(velFn, n = 400) {
-    const acc = new Float64Array(n + 1);
-    let s = 0;
-    for (let i = 1; i <= n; i++) {
-      const x0 = (i - 1) / n, x1 = i / n;
-      s += (velFn(x0) + velFn(x1)) / 2 / n; // trapezis
-      acc[i] = s;
-    }
-    const total = acc[n];
-    return {
-      pos(x) {
-        if (x <= 0) return 0;
-        if (x >= 1) return 1;
-        const f = x * n, i = Math.floor(f);
-        return U.lerp(acc[i], acc[i + 1], f - i) / total;
-      },
-      vel: x => velFn(U.clamp(x, 0, 1)) / total, // dpos/dx
-    };
-  }
 
   /* ═══ CONSTRUCCIÓ DELS CANVASOS ═══ */
   function init(refs) {
@@ -537,148 +506,28 @@ const Anim = (() => {
     g.restore();
   }
 
-  /* ═══ EL PLA DE LA TIRADA ═══
-     La casella ja està decidida: el desplaçament angular total de la
-     bola respecte de la roda és un valor FIX. Perfilem la velocitat i
-     normalitzem la seva integral perquè doni exactament aquest valor:
-     les quatre fases posen la sensació, la restricció d'integral
-     garanteix el resultat. Cap correcció a l'últim fotograma. */
-  function plaTirada(idxObjectiu, durada) {
-    const T = durada;
-    const tAssentament = T * 0.80;
-    const Tb = U.clamp(T * 0.135, 1.05, 1.55);       // fase de rebots
-    const pas = roda.pas;
-
-    /* — roda: arrenca en 0,45 s i frena amb desacceleració quasi constant — */
-    const perfilRoda = creaPerfil(x => Math.min(1, x / 0.045) * Math.pow(1 - x, 1.25) + 0.0001);
-    const voltesRoda = 2.1 + T * 0.11 + U.visual(-0.15, 0.15);
-    const W0 = W;
-    const LW = -U.TAU * voltesRoda;                   // la roda gira antihorari
-    const angleRoda = t => W0 + LW * perfilRoda.pos(U.clamp(t / T, 0, 1));
-    const velRoda = t => LW * perfilRoda.vel(U.clamp(t / T, 0, 1)) / T;
-
-    /* — fase de rebots (espai relatiu a la roda) —
-       la bola llisca i salta caselles senceres fins a quedar EXACTA
-       al centre de la casella decidida */
-    const nSalts = 2 + (Math.random() < 0.4 ? 1 : 0);
-    const lliscada = pas * U.visual(0.9, 1.7);
-    const marge = lliscada + nSalts * pas;            // recorregut relatiu de la fase
-    const relObjectiu = idxObjectiu * pas;            // angle local del centre decidit
-
-    /* — fase de pista: perfil sostingut al principi, caiguda marcada al final
-       (mai un easeOut clàssic: arribaria mort al moment de caure) — */
-    const perfilBola = creaPerfil(x => Math.pow(1 - 0.86 * x, 1.6) + 0.045);
-    const B0 = PORT_ANGLE;
-
-    /* tC es retoca lleugerament perquè el primer contacte caigui a la vora
-       d'un rombe deflector real */
-    let tC = tAssentament - Tb;
-    {
-      let millor = tC, distMillor = 1e9;
-      for (let d = -0.22; d <= 0.22; d += 0.02) {
-        const t = tC + d;
-        const mon = U.wrap(angleRoda(t) + relObjectiu - marge);
-        let dist = 1e9;
-        for (let j = 0; j < N_DEFLECTORS; j++) {
-          const del = U.wrap(j * U.TAU / N_DEFLECTORS + Math.PI / 8);
-          dist = Math.min(dist, Math.abs(U.difAngular(mon, del)));
-        }
-        if (dist < distMillor) { distMillor = dist; millor = t; }
-      }
-      tC = millor;
-    }
-
-    /* desplaçament total de la fase de pista: tanca el bucle amb el
-       contacte exacte — β(tC) = W(tC) + relObjectiu − marge (mod 2π) */
-    const relContacte = relObjectiu - marge;
-    const feta = U.wrap(angleRoda(tC) + relContacte - B0);
-    const voltesBola = Math.round(4.6 + T * 0.42 + U.visual(-0.3, 0.3));
-    const DA = feta + U.TAU * voltesBola;             // sempre positiu: la bola va horària
-
-    /* — segments de la fase de rebots (temps absolut, espai relatiu) — */
-    const segments = [];
-    {
-      let durs = [0.18, 0.34];                        // xoc amb deflector + lliscada
-      const avanç = [lliscada * 0.55, lliscada * 0.45];
-      for (let h = 0; h < nSalts; h++) {
-        durs.push(0.34 - h * 0.05 + U.visual(-0.02, 0.02));
-        avanç.push(pas);
-      }
-      const totalDur = durs.reduce((a, b) => a + b, 0);
-      durs = durs.map(d => d * Tb / totalDur);        // normalitzem al temps de fase
-      let t0 = tC, rel = relContacte;
-      for (let s = 0; s < durs.length; s++) {
-        segments.push({
-          t0, t1: t0 + durs[s], rel0: rel, rel1: rel + avanç[s],
-          salt: s >= 2, primer: s === 0,
-        });
-        t0 += durs[s]; rel += avanç[s];
-      }
-    }
-
-    const ompleRebots = t => {
-      for (const s of segments) {
-        if (t <= s.t1 || s === segments[segments.length - 1]) {
-          const u = U.clamp((t - s.t0) / (s.t1 - s.t0), 0, 1);
-          const rel = U.lerp(s.rel0, s.rel1, s.salt ? u : U.easeOutQuad(u));
-          let radi, alçada = 0;
-          if (s.primer) {
-            /* rebot al deflector: surt disparada cap enfora i cau */
-            const bomba = Math.sin(u * Math.PI);
-            radi = U.lerp(RD.deflector, RD.repos + 0.02, U.easeInQuad(u)) + bomba * 0.035;
-          } else if (s.salt) {
-            radi = RD.repos;
-            alçada = Math.sin(u * Math.PI) * (0.55 - 0.13 * segments.indexOf(s));
-          } else {
-            radi = U.lerp(RD.repos + 0.02, RD.repos, u);
-          }
-          return { rel, radi, alçada: Math.max(0, alçada) };
-        }
-      }
-      return { rel: relObjectiu, radi: RD.repos, alçada: 0 };
-    };
-
-    return {
-      T, tC, tAssentament, idxObjectiu,
-      angleRoda, velRoda,
-      omegaMaxBola: (DA * perfilBola.vel(0)) / tC,
-      estat: 'pista', tCaiguda: -1,
-      posicio(t) {
-        /* retorna {beta (angle món), radi (fracció R), alçada, velBola} */
-        if (t < tC) {
-          const x = U.clamp(t / tC, 0, 1);
-          const beta = B0 + DA * perfilBola.pos(x);
-          const vel = DA * perfilBola.vel(x) / tC;
-          let radi = RD.bola - 0.004 * x;
-          if (this.tCaiguda >= 0 && t >= this.tCaiguda) {
-            /* la caiguda es dispara per VELOCITAT (no per temps): el radi
-               baixa de la pista fins al deflector just al contacte */
-            const u = U.clamp((t - this.tCaiguda) / Math.max(0.001, tC - this.tCaiguda), 0, 1);
-            radi = U.lerp(RD.bola, RD.deflector, U.easeInQuad(u));
-          }
-          return { beta, radi, alçada: 0, velBola: vel };
-        }
-        if (t < tAssentament) {
-          const r = ompleRebots(t);
-          return { beta: this.angleRoda(t) + r.rel, radi: r.radi, alçada: r.alçada, velBola: this.velRoda(t) };
-        }
-        /* rotació solidària amb la roda fins que s'atura del tot */
-        return { beta: this.angleRoda(t) + relObjectiu, radi: RD.repos, alçada: 0, velBola: this.velRoda(t) };
-      },
-      segments,
-    };
-  }
-
-  /* ═══ EXECUCIÓ DE LA TIRADA ═══ */
+  /* ═══ EXECUCIÓ DE LA TIRADA ═══
+     El pla i la màquina d'estats viuen a Fisica; aquí només es pinta.
+     Els esdeveniments passen per un embolcall que situa flaixos i
+     ones abans de reenviar-los a l'orquestrador. */
   function tira(idxObjectiu, durada, cb) {
     return new Promise(res => {
       cbEvents = cb || (() => {});
       acabaTirada = res;
-      const pla = plaTirada(idxObjectiu, durada);
-      tirada = {
-        pla, t: 0, casellaPrevia: null, dins: false,
-        emesos: { caiguda: false, contacte: false, saltFets: new Set(), assentada: false, ultims: false },
-      };
+      const pla = Fisica.plaTirada(W, roda, idxObjectiu, durada);
+      const viva = Fisica.novaTirada(pla, roda, ev => {
+        if (ev.tipus === 'clic') flaixSeparador(ev.rel);
+        else if (ev.tipus === 'deflector') flaixDeflector(ev.beta);
+        else if (ev.tipus === 'assentada') {
+          ones.push({
+            x: centre + Math.cos(ev.beta) * R * ev.radi,
+            y: centre + Math.sin(ev.beta) * R * ev.radi,
+            t0: performance.now(),
+          });
+        }
+        cbEvents(ev);
+      });
+      tirada = { pla, viva, ultim: null };
       ultimaCasella = -1;
       cuaBola = [];
       document.body.classList.add('tirant');
@@ -687,70 +536,12 @@ const Anim = (() => {
   }
 
   function passaTirada(dt) {
-    const T = tirada;
-    const pla = T.pla;
-    T.t += dt;
-    const t = T.t;
-
-    /* transició PISTA → CAIGUDA disparada per velocitat angular */
-    if (pla.tCaiguda < 0 && t < pla.tC) {
-      const v = pla.posicio(t).velBola;
-      if (v < pla.omegaMaxBola * 0.17) {
-        pla.tCaiguda = t;
-        T.emesos.caiguda = true;
-        cbEvents({ tipus: 'caiguda' });
-      }
-    }
-    /* últims segons: focus tancat i clima de tensió */
-    if (!T.emesos.ultims && t > pla.tAssentament - 1.6) {
-      T.emesos.ultims = true;
-      cbEvents({ tipus: 'ultims' });
-    }
-    W = pla.angleRoda(t);
-    const p = pla.posicio(t);
-    /* pan estèreo segons la posició horitzontal real de la bola */
-    const pan = Math.cos(p.beta) * 0.7;
-
-    if (!T.emesos.contacte && t >= pla.tC) {
-      T.emesos.contacte = true;
-      cbEvents({ tipus: 'deflector', força: 1, pan });
-      flaixDeflector(pla.posicio(pla.tC + 0.001).beta);
-    }
-    for (let s = 2; s < pla.segments.length; s++) {
-      const seg = pla.segments[s];
-      if (!T.emesos.saltFets.has(s) && t >= seg.t1) {
-        T.emesos.saltFets.add(s);
-        cbEvents({ tipus: 'salt', força: 1 - (s - 2) * 0.25, pan });
-      }
-    }
-    if (!T.emesos.assentada && t >= pla.tAssentament) {
-      T.emesos.assentada = true;
-      cbEvents({ tipus: 'assentada', pan });
-      /* ona expansiva curta al punt de l'assentament */
-      ones.push({
-        x: centre + Math.cos(p.beta) * R * p.radi,
-        y: centre + Math.sin(p.beta) * R * p.radi,
-        t0: performance.now(),
-      });
-    }
-
-    /* clics contra els separadors: només quan la bola ja és a l'altura
-       de les caselles; freqüència = velocitat relativa real */
-    if (p.radi < RD.cellaExt + 0.06 && t < pla.tAssentament) {
-      const rel = U.wrap(p.beta - W);
-      const cella = Math.floor(rel / roda.pas + 0.5) % roda.total;
-      if (T.casellaPrevia !== null && cella !== T.casellaPrevia) {
-        const velRel = Math.abs(p.velBola - pla.velRoda(t));
-        cbEvents({ tipus: 'clic', força: U.clamp(velRel / 9, 0.15, 1), pan });
-        flaixSeparador(rel);
-      }
-      T.casellaPrevia = cella;
-    }
-
-    if (t >= pla.T) {
+    const r = tirada.viva.pas(dt);
+    W = r.W;
+    tirada.ultim = r;
+    if (r.acabada) {
       /* roda aturada del tot: la tirada acaba, la bola queda assentada */
-      W = pla.angleRoda(pla.T);
-      ultimaCasella = pla.idxObjectiu;
+      ultimaCasella = tirada.pla.idxObjectiu;
       const fi = acabaTirada;
       tirada = null;
       acabaTirada = null;
@@ -759,7 +550,7 @@ const Anim = (() => {
       fi && fi();
       return null;
     }
-    return p;
+    return r.p;
   }
 
   function flaixSeparador(relAngle) {
@@ -796,7 +587,7 @@ const Anim = (() => {
     if (tirada) {
       p = passaTirada(dt);
       if (tirada) pintaRoda();
-      const velRodaAra = tirada ? Math.abs(tirada.pla.velRoda(tirada.t)) : 0;
+      const velRodaAra = tirada && tirada.ultim ? Math.abs(tirada.ultim.velRoda) : 0;
       Audio.fotogramaTirada(tirada ? {
         velRoda: velRodaAra,
         velBola: Math.abs(p ? p.velBola : 0),
@@ -1026,5 +817,7 @@ const Anim = (() => {
     brillaJuntura, obreTrampa, tancaTrampa,
     esbossaBolaEnRepos: () => { ultimaCasella = -1; pintaQuiet(); },
     get roda() { return roda; },
+    /* el cap pintat serveix de textura a la roda 3D */
+    capOffscreen: () => capOff,
   };
 })();
