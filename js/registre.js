@@ -87,11 +87,13 @@ const Registre = (() => {
       const nom = Estat.nomDe(e.guanyadorId, e.guanyador);
       const cad = e.cadena && e.cadena.length > 1
         ? `<div class="entrada-cadena">${U.escapaHTML(cadenaText(e.cadena, ' → '))}</div>` : '';
+      const desc = e.text
+        ? `<div class="entrada-descripcio">${U.escapaHTML(e.text)}</div>` : '';
       return `<button type="button" class="entrada-fila" data-ts="${e.timestamp}">
         <div class="entrada-meta">#${U.tresDigits(e.num)} · ${U.dataCurta(e.timestamp)} · ${U.horaCurta(e.timestamp)}</div>
         <div class="entrada-guanyador"><span class="punt-color" style="background:${colorDe(e.guanyadorId)}"></span>${U.escapaHTML(nom)}</div>
         ${cad}
-        <div class="entrada-descripcio">${U.escapaHTML(e.text)}</div>
+        ${desc}
       </button>`;
     }).join('');
     elLlista.querySelectorAll('.entrada-fila').forEach(b => {
@@ -106,7 +108,7 @@ const Registre = (() => {
   function obreFitxa(e) {
     document.getElementById('fitxaNum').textContent =
       `SESSIÓ #${U.dosDigits(e.sessio)} · INCIDÈNCIA #${U.tresDigits(e.num)}`;
-    document.getElementById('fitxaText').textContent = e.text;
+    document.getElementById('fitxaText').textContent = e.text || '—';
     document.getElementById('fitxaGuanyador').textContent = Estat.nomDe(e.guanyadorId, e.guanyador).toUpperCase();
     const filaCad = document.getElementById('fitxaCadenaFila');
     if (e.cadena && e.cadena.length > 1) {

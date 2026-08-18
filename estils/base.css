@@ -60,7 +60,7 @@ button:disabled { cursor: default; }
   position: relative;
   height: 100dvh;
   display: grid;
-  grid-template-rows: auto auto auto 1fr auto auto;
+  grid-template-rows: auto auto 1fr auto auto;
   grid-template-columns: 100%;
   overflow: hidden;
   background:
@@ -209,49 +209,7 @@ button:disabled { cursor: default; }
 .compt-xifra { color: var(--llauto2); text-shadow: 0 0 10px rgba(210, 177, 90, .25); }
 .compt-sep { margin: 0 10px; color: var(--llauto0); }
 
-/* ─── Placa de registre de la incidència ─── */
-#placa {
-  position: relative;
-  z-index: 6;
-  justify-self: center;
-  width: min(640px, calc(100vw - 28px));
-  margin-top: 4px;
-}
-.placa-cos {
-  position: relative;
-  border-radius: 3px;
-  padding: 7px;
-  background:
-    var(--soroll),
-    linear-gradient(172deg, #241a11 0%, #180f0a 38%, #241a10 74%, #120b07 100%);
-  background-blend-mode: overlay, normal;
-  box-shadow:
-    0 1px 0 rgba(120, 90, 40, .18) inset,
-    0 14px 30px -12px rgba(0, 0, 0, .85),
-    0 3px 8px rgba(0, 0, 0, .55);
-  border: 1px solid rgba(0, 0, 0, .85);
-}
-/* placa interior de llautó */
-.placa-cos::before {
-  content: '';
-  position: absolute; inset: 7px;
-  border-radius: 2px;
-  background:
-    linear-gradient(168deg, #86691f 0%, #b6923e 26%, #d9ba68 44%, #a9863a 66%, #6c5118 100%);
-  box-shadow:
-    inset 0 1px 2px rgba(255, 244, 210, .5),
-    inset 0 -2px 5px rgba(43, 30, 6, .75),
-    inset 0 0 40px rgba(70, 50, 10, .28);
-}
-.placa-cos::after { /* pàtina */
-  content: '';
-  position: absolute; inset: 7px;
-  border-radius: 2px;
-  background: var(--soroll);
-  opacity: .5;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
+/* ─── Cargols de llautó (fitxa del registre i confirmació) ─── */
 .placa-cargol {
   position: absolute;
   width: 7px; height: 7px;
@@ -275,82 +233,6 @@ button:disabled { cursor: default; }
 .c3::before { transform: rotate(78deg); }
 .c4 { bottom: 11px; right: 11px; }
 .c4::before { transform: rotate(-64deg); }
-
-.placa-capcal {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 9px 26px 0;
-}
-#placaTitol {
-  font-family: var(--f-display);
-  font-size: 12px;
-  letter-spacing: .3em;
-  color: #43310e;
-  text-shadow: 0 1px 0 rgba(255, 246, 214, .4);
-  transition: color var(--transicio);
-}
-#placa.te-text #placaTitol { color: #2e1f06; }
-.placa-compt {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: .12em;
-  color: #5c4715;
-  text-shadow: 0 1px 0 rgba(255, 246, 214, .3);
-}
-.placa-camp { position: relative; z-index: 1; padding: 3px 24px 10px; }
-#campText {
-  display: block;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  resize: none;
-  overflow: hidden;
-  font-family: var(--f-cos);
-  font-size: 16.5px;
-  font-style: italic;
-  line-height: 1.4;
-  color: #2b1d08;
-  text-shadow: 0 1px 0 rgba(255, 246, 214, .32);
-  caret-color: #4a3208;
-  padding: 4px 2px;
-  border-bottom: 1px solid rgba(62, 45, 12, .5);
-  transition: border-color var(--transicio);
-}
-#campText::placeholder { color: rgba(70, 52, 16, .55); font-style: italic; }
-#campText:focus { border-bottom-color: rgba(46, 32, 8, .85); }
-#placa.segellada #campText { border-bottom-color: transparent; }
-
-/* segell de bloqueig durant la tirada */
-#placaSegell {
-  position: absolute;
-  right: 34px; top: 58%;
-  z-index: 2;
-  transform: translateY(-50%) rotate(-7deg) scale(1.5);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 300ms ease, transform 300ms cubic-bezier(.2, 1.6, .4, 1);
-}
-#placaSegell span {
-  display: block;
-  font-family: var(--f-display);
-  font-size: 11px;
-  letter-spacing: .3em;
-  text-indent: .3em;
-  color: #6d1a1a;
-  border: 2px solid #6d1a1a;
-  border-radius: 2px;
-  padding: 4px 8px 3px;
-  box-shadow: inset 0 0 0 1px rgba(109, 26, 26, .35);
-  mix-blend-mode: multiply;
-}
-#placa.segellada #placaSegell {
-  opacity: .85;
-  transform: translateY(-50%) rotate(-7deg) scale(1);
-}
-#placa.segellada #campText { pointer-events: none; }
 
 /* ─── La taula: escenari de la roda + llegenda ─── */
 #taula {
@@ -496,22 +378,22 @@ body.final-tirada #focusFinal { opacity: 1; }
   z-index: 6;
   display: grid;
   place-items: center;
-  padding: 6px 0 10px;
+  padding: 8px 0 12px;
 }
 .boto-base {
   position: relative;
-  padding: 5px 7px;
-  border-radius: 4px;
+  padding: 6px 8px;
+  border-radius: 5px;
   background: linear-gradient(175deg, #221810, #0d0805);
-  box-shadow: inset 0 1px 0 rgba(150, 115, 50, .25), 0 8px 22px -8px rgba(0, 0, 0, .9);
+  box-shadow: inset 0 1px 0 rgba(150, 115, 50, .25), 0 10px 26px -8px rgba(0, 0, 0, .9);
   border: 1px solid rgba(0, 0, 0, .9);
 }
 #btnTirar {
   position: relative;
   display: block;
-  min-width: 280px;
-  padding: 11px 38px 9px;
-  border-radius: 3px;
+  min-width: min(420px, calc(100vw - 60px));
+  padding: 16px 52px 13px;
+  border-radius: 4px;
   background:
     linear-gradient(178deg, #caa851 0%, #b08d3b 30%, #96742c 55%, #c8a750 78%, #6e5117 100%);
   border: 1px solid #4e390d;
@@ -540,21 +422,22 @@ body.final-tirada #focusFinal { opacity: 1; }
 #btnTirarText {
   display: block;
   font-family: var(--f-display);
-  font-size: 15.5px;
-  letter-spacing: .26em;
-  text-indent: .26em;
-  color: #33240a;
-  text-shadow: 0 1px 0 rgba(255, 246, 214, .45);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: .34em;
+  text-indent: .34em;
+  color: #2c1f08;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, .5);
   white-space: nowrap;
 }
 .btn-tecla {
   display: block;
-  margin-top: 2px;
+  margin-top: 3px;
   font-family: var(--f-mono);
-  font-size: 8.5px;
+  font-size: 9.5px;
   letter-spacing: .5em;
   text-indent: .5em;
-  color: rgba(51, 36, 10, .65);
+  color: rgba(51, 36, 10, .7);
 }
 
 /* ─── Peu: registre, croupier, ajustos ─── */

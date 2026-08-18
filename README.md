@@ -6,8 +6,12 @@ dels anys 60-70: fusta fosca, llautó, tapet verd i tipografia gravada.
 Tota la interfície és en català.
 
 La roda mostra **només colors** (sense números ni noms): cada membre té
-el seu color i el verd és el Jefe. La llegenda de sota la placa és la
-clau de lectura, amb el comptador de cada membre.
+el seu color i el verd és el Jefe. La llegenda del costat de la roda és
+la clau de lectura, amb el comptador de cada membre.
+
+El joc és un sol gest: **prémer START** (o la barra espaiadora) tira la
+bola i la casella on cau decideix qui s'endú la incidència. No cal
+escriure res.
 
 ## Com s'obre
 
@@ -27,7 +31,7 @@ scripts es carreguen amb rutes relatives i funcionen sota `file://`
 ```
 index.html            La pàgina: marcatge, CDN i ordre de càrrega
 estils/
-  base.css            Paleta, taula principal, placa, roda, botó, peu
+  base.css            Paleta, taula principal, roda, botó START, peu
   pantalles.css       Portada, celebració, trampa, registre, ajustos,
                       responsive i la passada de materials
 js/
@@ -48,7 +52,7 @@ js/
   trampa.js           El tub pneumàtic i l'escalada de la trampa
   celebracio.js       Revelació i celebració (incloent-hi el zero)
   registre.js         Llibre de registre, estadístiques, rècords, CSV
-  ui.js               Placa, llegenda, croupier, teclat, ajustos
+  ui.js               Botó START, llegenda, croupier, teclat, ajustos
   cine.js             Capa de coreografia GSAP (opcional)
   main.js             Orquestrador del flux i tria del motor de roda
 ```
@@ -69,7 +73,6 @@ js/
 
 ## Dreceres
 
-- **Espai** — tirar (si el focus no és al camp de text)
-- **Ctrl+Retorn** — tirar des de dins del camp
+- **Espai** — tirar (com el botó START)
 - **Esc** — tancar la celebració o el panell obert
 - **M** — silenciar

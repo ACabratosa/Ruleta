@@ -1210,12 +1210,8 @@
   #capcalera { padding-top: 10px; }
   .lema { display: none; }
   #btnSilenci { top: 8px; right: 10px; width: 34px; height: 34px; }
-  #placa { width: calc(100vw - 16px); }
-  .placa-capcal { padding: 7px 18px 0; }
-  .placa-camp { padding: 2px 16px 8px; }
-  #campText { font-size: 15px; }
-  #btnTirar { min-width: min(320px, calc(100vw - 56px)); padding: 13px 22px 11px; }
-  #btnTirarText { font-size: 14px; letter-spacing: .2em; text-indent: .2em; }
+  #btnTirar { min-width: min(340px, calc(100vw - 56px)); padding: 14px 24px 12px; }
+  #btnTirarText { font-size: 22px; letter-spacing: .24em; text-indent: .24em; }
   #peu { padding: 2px 12px 10px; gap: 8px; }
   #croupier { font-size: 11.5px; }
   .llibre-pagina { padding: 8px 16px 12px; }
@@ -1249,10 +1245,9 @@ body { font-size: 16px; }
 .casa { letter-spacing: .24em; text-indent: .24em; font-weight: 500; }
 .sala-linia { letter-spacing: .34em; text-indent: .34em; }
 .lema { font-size: 13.5px; }
-#campText { font-size: 18px; font-weight: 500; }
 .entrada-casa { letter-spacing: .28em; text-indent: .28em; }
 .entrada-sala { letter-spacing: .4em; text-indent: .4em; }
-#btnTirarText { letter-spacing: .18em; text-indent: .18em; }
+#btnTirarText { letter-spacing: .3em; text-indent: .3em; }
 .btn-peu { letter-spacing: .22em; text-indent: .22em; }
 .lleg-nom { letter-spacing: .07em; }
 .cel-text { font-size: 18px; }
@@ -1290,13 +1285,6 @@ body.te-gsap .cel-nom .lletra { display: inline-block; }
    ════════════════════════════════════════════════════════════════ */
 
 /* — llautó tornejat: el cònic simula el poliment circular del metall — */
-.placa-cos::before {
-  background:
-    conic-gradient(from 205deg at 20% 10%,
-      rgba(255, 246, 210, .30) 0 7%, transparent 16% 55%,
-      rgba(58, 44, 8, .32) 66% 78%, transparent 90%),
-    linear-gradient(168deg, #86691f 0%, #b6923e 26%, #d9ba68 44%, #a9863a 66%, #6c5118 100%);
-}
 .fitxa-placa {
   background:
     conic-gradient(from 195deg at 24% 8%,
@@ -1306,13 +1294,6 @@ body.te-gsap .cel-nom .lletra { display: inline-block; }
 }
 
 /* — ombres multicapa: contacte curt + projecció llarga de la sala — */
-.placa-cos {
-  box-shadow:
-    0 1px 0 rgba(120, 90, 40, .18) inset,
-    0 3px 8px rgba(0, 0, 0, .55),
-    0 14px 30px -12px rgba(0, 0, 0, .85),
-    0 40px 70px -30px rgba(0, 0, 0, .7);
-}
 .boto-base {
   box-shadow:
     inset 0 1px 0 rgba(150, 115, 50, .25),
@@ -1367,7 +1348,6 @@ body.te-gsap .cel-nom .lletra { display: inline-block; }
     0 0 18px rgba(210, 177, 90, .3),
     0 0 46px rgba(210, 177, 90, .14);
 }
-#placaTitol { font-size: 13px; font-weight: 600; }
 .entrada-casa { font-weight: 600; }
 .cel-nom { font-weight: 600; }
 #celebracio.fase-nom .cel-nom {
@@ -1446,9 +1426,6 @@ body.mode-3d #plaRoda { display: none; }
 }
 #croupier { color: var(--ivori1); opacity: .9; }
 .btn-peu { color: var(--llauto3); }
-#campText::placeholder { color: rgba(70, 52, 16, .75); }
-.placa-compt { color: #43340e; }
-#placaTitol { color: #33250a; }
 .lleg-nom small { opacity: .85; }
 .lleg-fila { border-color: rgba(150, 114, 44, .5); }
 .cel-ratxa { color: var(--ivori1); }
@@ -1476,10 +1453,7 @@ body.mode-3d #plaRoda { display: none; }
 body.mode-3d.final-tirada #mon3d { transform: none; }
 #capcalera { padding-top: 8px; }
 #comptadors { padding: 4px 0 2px; }
-#placa { width: min(580px, calc(100vw - 28px)); }
-.placa-capcal { padding: 6px 22px 0; }
-.placa-camp { padding: 2px 20px 8px; }
-#zonaBoto { padding: 4px 0 8px; }
+#zonaBoto { padding: 4px 0 10px; }
 #peu { padding: 2px 22px 8px; }
 #taula { padding: 0 6px; }
 #llegenda { gap: 9px; max-width: 230px; }

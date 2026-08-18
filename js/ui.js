@@ -1,9 +1,9 @@
 /* ════════════════════════════════════════════════════════════════
-   INTERFÍCIE — placa, llegenda, croupier, teclat, ajustos
+   INTERFÍCIE — botó START, llegenda, croupier, teclat, ajustos
    ════════════════════════════════════════════════════════════════ */
 const UI = (() => {
   const $ = id => document.getElementById(id);
-  let camp, placa, btnTirar, btnTirarText, croupierEl, avisEl, avisTimer = 0;
+  let btnTirar, btnTirarText, croupierEl, avisEl, avisTimer = 0;
   let confirmaResol = null;
   let reduitMoviment = false; // prefers-reduced-motion actiu al sistema
 
@@ -88,36 +88,19 @@ const UI = (() => {
     }, 180);
   }
 
-  /* ─── placa d'incidència ─── */
-  function refrescaPlaca() {
-    const text = camp.value.trim();
-    const te = text.length > 0;
-    placa.classList.toggle('te-text', te);
-    $('placaTitol').textContent = te
-      ? `INCIDÈNCIA #${U.tresDigits(Estat.numSeguent())}`
-      : 'ESPERANT INCIDÈNCIA';
-    $('placaComptador').textContent = `${camp.value.length}/240`;
-    if (Main.estat() === 'repos') {
-      btnTirar.disabled = !te;
-      btnTirarText.textContent = te ? 'TIRAR LA RULETA' : 'ESCRIU UNA INCIDÈNCIA';
-      croupier(te ? 'La incidència ha estat registrada.' : 'Les apostes estan tancades.');
-    }
-    /* el camp creix; mai cap barra de desplaçament dins la placa */
-    camp.style.height = 'auto';
-    camp.style.height = camp.scrollHeight + 'px';
+  /* ─── el botó START: l'única crida a l'acció de la taula ─── */
+  function refrescaBoto() {
+    if (Main.estat() !== 'repos') return;
+    btnTirar.disabled = Estat.actius().length < 2;
+    btnTirarText.textContent = 'START';
+    croupier('Les apostes estan tancades.');
   }
 
-  function segellaPlaca() {
-    placa.classList.add('segellada');
-    camp.readOnly = true;
+  function bloquejaTirada() {
     btnTirar.disabled = true;
   }
-  function desegellaPlaca() {
-    placa.classList.remove('segellada');
-    camp.readOnly = false;
-    camp.value = '';
-    refrescaPlaca();
-    camp.focus();
+  function alliberaTirada() {
+    refrescaBoto();
   }
 
   /* ─── avisos ─── */
@@ -308,7 +291,7 @@ const UI = (() => {
       setTimeout(() => {
         Estat.novaSessio();
         refrescaComptadors();
-        refrescaPlaca();
+        refrescaBoto();
       }, 700);
       setTimeout(() => {
         cortina.classList.remove('visible');
@@ -344,15 +327,9 @@ const UI = (() => {
         return;
       }
       if (e.key === 'Enter' && confirmaOberta()) { tancaConfirma(true); return; }
-      /* barra espaiadora: tira NOMÉS si el focus no és al camp de text */
+      /* barra espaiadora: tira (fora dels camps dels ajustos) */
       if (e.code === 'Space' && !alCamp) {
         if (confirmaOberta() || Registre.oberta() || ajustosOberts() || Celebracio.oberta) return;
-        e.preventDefault();
-        Main.tirar();
-        return;
-      }
-      /* Ctrl+Enter: tira des de dins del camp */
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && document.activeElement === camp) {
         e.preventDefault();
         Main.tirar();
         return;
@@ -363,8 +340,6 @@ const UI = (() => {
 
   /* ─── inicialització ─── */
   function init() {
-    camp = $('campText');
-    placa = $('placa');
     btnTirar = $('btnTirar');
     btnTirarText = $('btnTirarText');
     croupierEl = $('croupier');
@@ -378,14 +353,6 @@ const UI = (() => {
       window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     document.body.classList.toggle('mode-calma', !!Estat.d.config.calma || reduitMoviment);
 
-    camp.addEventListener('input', () => {
-      /* els salts de línia no aporten res dins la placa */
-      if (/\r|\n/.test(camp.value)) camp.value = camp.value.replace(/[\r\n]+/g, ' ');
-      refrescaPlaca();
-    });
-    camp.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) e.preventDefault();
-    });
     btnTirar.addEventListener('click', () => Main.tirar());
     btnTirar.addEventListener('pointerenter', () => { if (!btnTirar.disabled) Audio.hoverBoto(); });
     /* reflex especular del llautó que segueix el ratolí */
@@ -417,15 +384,14 @@ const UI = (() => {
   function refresca() {
     refrescaComptadors();
     refrescaLlegenda();
-    refrescaPlaca();
+    refrescaBoto();
   }
 
   return {
-    init, refresca, refrescaPlaca, croupier,
-    segellaPlaca, desegellaPlaca,
+    init, refresca, refrescaBoto, croupier,
+    bloquejaTirada, alliberaTirada,
     avis, avisPersistent, confirma,
     ajustosOberts, tancaAjustos,
-    textIncidencia: () => camp.value.trim(),
     botoTirar: () => btnTirar,
   };
 })();

@@ -111,7 +111,9 @@ const Celebracio = (() => {
       posaBombetes();
 
       elIncident.textContent = `INCIDÈNCIA #${U.tresDigits(entrada.num)}`;
-      elText.textContent = entrada.text;
+      /* sense descripció (el flux START no en demana), la línia s'amaga */
+      elText.textContent = entrada.text || '';
+      elText.style.display = entrada.text ? '' : 'none';
       if (esZero) {
         elNom.textContent = 'LA BANCA GUANYA';
         elFrase.textContent = `EL ${entrada.guanyador.toUpperCase()} S'HO MENJA`;

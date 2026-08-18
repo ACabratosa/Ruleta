@@ -71,26 +71,6 @@
     <span class="compt-etiqueta">INCIDÈNCIA</span> <span id="numIncidencia" class="compt-xifra">#001</span>
   </div>
 
-  <!-- Placa de registre de la incidència -->
-  <section id="placa" aria-label="Registre de la incidència">
-    <div class="placa-cos">
-      <div class="placa-cargol c1" aria-hidden="true"></div>
-      <div class="placa-cargol c2" aria-hidden="true"></div>
-      <div class="placa-cargol c3" aria-hidden="true"></div>
-      <div class="placa-cargol c4" aria-hidden="true"></div>
-      <div class="placa-capcal">
-        <span id="placaTitol">ESPERANT INCIDÈNCIA</span>
-        <span id="placaComptador" class="placa-compt">0/240</span>
-      </div>
-      <div class="placa-camp">
-        <textarea id="campText" maxlength="240" rows="1" spellcheck="false"
-          placeholder="Escriu aquí la incidència que s&#39;ha de destinar…"
-          aria-label="Descripció de la incidència"></textarea>
-      </div>
-      <div id="placaSegell" aria-hidden="true"><span>SEGELLADA</span></div>
-    </div>
-  </section>
-
   <!-- Taula: la roda i la llegenda -->
   <main id="taula">
     <div id="escenari">
@@ -110,8 +90,8 @@
 
   <div id="zonaBoto">
     <div class="boto-base">
-      <button id="btnTirar" type="button" disabled>
-        <span id="btnTirarText">ESCRIU UNA INCIDÈNCIA</span>
+      <button id="btnTirar" type="button" aria-label="Tirar la bola">
+        <span id="btnTirarText">START</span>
         <span class="btn-tecla" aria-hidden="true">SPACE</span>
       </button>
     </div>

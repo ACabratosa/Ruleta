@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════
    ORQUESTRADOR — el flux de la incidència
-   Escriure → tirar → (trampa?) → assignar → desar al registre
+   START → tirada → (trampa?) → assignar → desar al registre
    ════════════════════════════════════════════════════════════════ */
 
 /* El motor de la roda: Anim (canvas 2D, sempre disponible) o Anim3D
@@ -67,8 +67,6 @@ const Main = (() => {
       UI.avisPersistent('El generador criptogràfic del navegador no està disponible. La taula queda tancada: no s’hi pot jugar sense atzar honest.');
       return;
     }
-    const text = UI.textIncidencia();
-    if (!text) return;
     if (Estat.actius().length < 2) {
       UI.avis(Estat.actius().length === 0
         ? 'Tots els participants són absents. Obre els ajustos i retorna algú a la taula.'
@@ -78,7 +76,7 @@ const Main = (() => {
 
     estat = 'tirant';
     Audio.assegura();
-    UI.segellaPlaca();
+    UI.bloquejaTirada();
     UI.croupier('Faites vos jeux.');
     Audio.premBoto();
     Cine.preTirada();
@@ -132,7 +130,7 @@ const Main = (() => {
           const entrada = Estat.afegeixEntrada({
             num: numIncidencia,
             sessio: Estat.d.sessio,
-            text,
+            text: '',
             guanyador: nom,
             guanyadorId: id,
             cadena: cadena.length > 1 ? cadena : null,
@@ -151,7 +149,7 @@ const Main = (() => {
       document.getElementById('app').classList.remove('tremola-continu');
       Audio.ducA(1, 400);
       Audio.ambientA(1, 900);
-      UI.desegellaPlaca();
+      UI.alliberaTirada();
       UI.refresca();
       if (Registre.oberta()) Registre.pintaLlista();
     }
