@@ -31,6 +31,12 @@
   --tinta: #2E2417;
   --tinta-suau: #574834;
   --verd-jefe: #0E6B43;
+  /* tons d'ombra i intermedis: donen profunditat als materials */
+  --llauto-ombra: #3a2c08;
+  --fusta-fosca: #0d0805;
+  --fusta-clara: #3a2413;
+  --verd-jefe-fosc: #063a26;
+  --verd-jefe-brillant: #1a8a5a;
   /* Cinzel i Cormorant Garamond via CDN; les piles de sistema queden
      de reserva per si no hi ha connexió */
   --f-display: "Cinzel", "Bodoni MT", "Palatino Linotype", "Book Antiqua", Georgia, serif;
@@ -1936,13 +1942,174 @@ body.te-gsap #celebracio.fase-nom .cel-nom {
   transform: none;
   opacity: 1;
 }
+body.te-gsap .cel-nom .lletra { display: inline-block; }
+
+/* ════════════════════════════════════════════════════════════════
+   MATERIALS I POSTPROCÉS — la passada de luxe
+   Gradients cònics per al llautó tornejat, ombres multicapa, reflex
+   especular que segueix el ratolí, gra viu, fuites de llum i
+   aberració cromàtica per a instants de màxima tensió.
+   ════════════════════════════════════════════════════════════════ */
+
+/* — llautó tornejat: el cònic simula el poliment circular del metall — */
+.placa-cos::before {
+  background:
+    conic-gradient(from 205deg at 20% 10%,
+      rgba(255, 246, 210, .30) 0 7%, transparent 16% 55%,
+      rgba(58, 44, 8, .32) 66% 78%, transparent 90%),
+    linear-gradient(168deg, #86691f 0%, #b6923e 26%, #d9ba68 44%, #a9863a 66%, #6c5118 100%);
+}
+.fitxa-placa {
+  background:
+    conic-gradient(from 195deg at 24% 8%,
+      rgba(255, 246, 210, .26) 0 6%, transparent 15% 58%,
+      rgba(58, 44, 8, .30) 70% 80%, transparent 92%),
+    linear-gradient(168deg, #8a6c22 0%, #b6923e 28%, #d5b662 46%, #a5823a 68%, #6c5118 100%);
+}
+
+/* — ombres multicapa: contacte curt + projecció llarga de la sala — */
+.placa-cos {
+  box-shadow:
+    0 1px 0 rgba(120, 90, 40, .18) inset,
+    0 3px 8px rgba(0, 0, 0, .55),
+    0 14px 30px -12px rgba(0, 0, 0, .85),
+    0 40px 70px -30px rgba(0, 0, 0, .7);
+}
+.boto-base {
+  box-shadow:
+    inset 0 1px 0 rgba(150, 115, 50, .25),
+    0 8px 22px -8px rgba(0, 0, 0, .9),
+    0 34px 60px -26px rgba(0, 0, 0, .75);
+}
+
+/* — botó: cònic de metall, ombra llarga que es recull en prémer i
+     reflex especular que segueix el ratolí — */
+#btnTirar {
+  background:
+    conic-gradient(from 200deg at 26% 0%,
+      rgba(255, 246, 210, .34) 0 8%, transparent 18% 52%,
+      rgba(58, 44, 8, .30) 64% 78%, transparent 90%),
+    linear-gradient(178deg, #caa851 0%, #b08d3b 30%, #96742c 55%, #c8a750 78%, #6e5117 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 244, 208, .65),
+    inset 0 -3px 6px rgba(53, 37, 6, .6),
+    0 6px 0 #43310c,
+    0 11px 20px rgba(0, 0, 0, .65),
+    0 30px 46px -18px rgba(0, 0, 0, .8);
+}
+#btnTirar:active:not(:disabled),
+#btnTirar.premut:not(:disabled) {
+  box-shadow:
+    inset 0 1px 1px rgba(255, 244, 208, .5),
+    inset 0 -2px 4px rgba(53, 37, 6, .6),
+    0 1px 0 #43310c,
+    0 4px 8px rgba(0, 0, 0, .55),
+    0 10px 18px -10px rgba(0, 0, 0, .6);
+}
+#btnTirar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  pointer-events: none;
+  background: radial-gradient(150px circle at var(--mx, 50%) var(--my, 20%),
+    rgba(255, 248, 220, .38), rgba(255, 248, 220, .08) 45%, transparent 68%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+#btnTirar:hover:not(:disabled)::after { opacity: 1; }
+
+/* — tipografia amb presència de gravat — */
+.casa {
+  font-size: clamp(21px, 2.9vw, 30px);
+  font-weight: 600;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, .85),
+    0 0 18px rgba(210, 177, 90, .3),
+    0 0 46px rgba(210, 177, 90, .14);
+}
+#placaTitol { font-size: 13px; font-weight: 600; }
+.entrada-casa { font-weight: 600; }
+.cel-nom { font-weight: 600; }
+#celebracio.fase-nom .cel-nom {
+  text-shadow:
+    0 0 6px rgba(241, 231, 204, .35),
+    0 0 24px rgba(210, 177, 90, .55),
+    0 0 60px rgba(210, 177, 90, .3),
+    0 0 120px rgba(210, 177, 90, .18);
+}
+#comptadors, .lleg-compt, .odo-cinta, .stats-taula td, .fitxa-valor {
+  font-variant-numeric: tabular-nums;
+}
+
+/* — gra de pel·lícula viu: tremola com el gra real d'un fotograma — */
+.sala-gra { animation: graViu 0.5s steps(4) infinite; }
+@keyframes graViu {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-7px, 5px); }
+  50%  { transform: translate(5px, -6px); }
+  75%  { transform: translate(-4px, -3px); }
+  100% { transform: translate(6px, 4px); }
+}
+
+/* — fuites de llum càlides, gairebé imperceptibles, sempre en moviment — */
+.sala-fuita {
+  position: absolute;
+  inset: -22%;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(36% 28% at 78% 16%, rgba(255, 206, 120, .055), transparent 70%),
+    radial-gradient(30% 26% at 10% 80%, rgba(255, 220, 150, .04), transparent 70%);
+  animation: fuitaDeriva 38s ease-in-out infinite alternate;
+}
+@keyframes fuitaDeriva {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to   { transform: translate(-3.5%, 2.5%) rotate(2deg); }
+}
+
+/* — la pols s'intensifica mentre la bola és a la pista — */
+body.tirant .sala-pols { opacity: .85; animation-duration: 28s; }
+
+/* — desenfocament de moviment de la roda quan gira de pressa — */
+#cnvRoda { will-change: transform; }
+#cnvRoda.mou { filter: blur(1.3px); }
+
+/* — aberració cromàtica: només instants curts de màxima tensió — */
+#app.aberracio { filter: url(#fAberracio); }
+
+/* — moviment reduït: tots els efectes cinètics s'apaguen — */
+body.mode-calma .sala-gra,
+body.mode-calma .sala-fuita { animation: none; }
+body.mode-calma #cnvRoda.mou { filter: none; }
+body.mode-calma #app.aberracio { filter: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sala-gra, .sala-fuita, .bombeta, #reflexRepos { animation: none; }
+  #cnvRoda.mou { filter: none; }
+  #app.aberracio { filter: none; }
+}
 </style>
 </head>
 <body>
+<!-- filtre d'aberració cromàtica per a instants de màxima tensió -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="fAberracio" x="-2%" y="-2%" width="104%" height="104%">
+    <feOffset in="SourceGraphic" dx="1.6" dy="0" result="despR"/>
+    <feOffset in="SourceGraphic" dx="-1.6" dy="0" result="despB"/>
+    <feColorMatrix in="despR" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="soR"/>
+    <feColorMatrix in="despB" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="soB"/>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="soG"/>
+    <feBlend in="soR" in2="soG" mode="screen" result="soRG"/>
+    <feBlend in="soRG" in2="soB" mode="screen"/>
+  </filter>
+</defs></svg>
+
 <div id="app" class="croupier-idle">
 
-  <!-- Ambient de sala: llum, gra i vinyeta -->
+  <!-- Ambient de sala: llum, gra, vinyeta i fuites de llum -->
   <div class="sala-vinyeta" aria-hidden="true"></div>
+  <div class="sala-fuita" aria-hidden="true"></div>
   <div class="sala-gra" aria-hidden="true"></div>
   <div class="sala-pols" aria-hidden="true"></div>
 
@@ -2512,6 +2679,7 @@ const Anim = (() => {
   let rafId = 0, ultimT = 0;
   let tirada = null;               // pla de la tirada en curs
   let flaixos = [];                // {angleLocal, t0}
+  let ones = [];                   // {x, y, t0} — ones expansives d'impacte
   let brillantors = [];            // {idx, t0, dur} — juntura de la casella
   let trapa = null;                // {idx, p, mode} — fulles del fons
   let bolaExtra = null;            // dibuix manual de la bola (trampa)
@@ -2634,7 +2802,7 @@ const Anim = (() => {
     fusta.addColorStop(1, '#140c07');
     g.fillStyle = fusta;
     g.beginPath(); g.arc(0, 0, R * RD.ext, 0, U.TAU); g.fill();
-    /* veta: anells concèntrics irregulars */
+    /* veta: anells concèntrics irregulars + estries curtes de fibra */
     g.save();
     g.beginPath(); g.arc(0, 0, R * RD.ext, 0, U.TAU); g.clip();
     for (let i = 0; i < 26; i++) {
@@ -2643,6 +2811,17 @@ const Anim = (() => {
       g.arc(R * 0.02 * Math.sin(i * 2.3), R * 0.015 * Math.cos(i * 1.7), rr, 0, U.TAU);
       g.strokeStyle = `rgba(${i % 2 ? '96,64,34' : '20,12,6'},${0.05 + 0.04 * Math.sin(i * 5)})`;
       g.lineWidth = 1 + (i % 3);
+      g.stroke();
+    }
+    /* estries: trams curts d'arc que trenquen la regularitat dels anells */
+    for (let i = 0; i < 46; i++) {
+      const rr = R * (0.72 + 0.27 * ((i * 0.618) % 1)) * RD.ext;
+      const a0 = (i * 2.399) % U.TAU;         // dispersió àuria
+      const span = 0.15 + ((i * 1.7) % 1) * 0.55;
+      g.beginPath();
+      g.arc(0, 0, rr, a0, a0 + span);
+      g.strokeStyle = i % 3 ? 'rgba(112,74,40,0.06)' : 'rgba(16,9,4,0.09)';
+      g.lineWidth = 0.7 + (i % 2);
       g.stroke();
     }
     g.restore();
@@ -3174,25 +3353,33 @@ const Anim = (() => {
       T.emesos.ultims = true;
       cbEvents({ tipus: 'ultims' });
     }
+    W = pla.angleRoda(t);
+    const p = pla.posicio(t);
+    /* pan estèreo segons la posició horitzontal real de la bola */
+    const pan = Math.cos(p.beta) * 0.7;
+
     if (!T.emesos.contacte && t >= pla.tC) {
       T.emesos.contacte = true;
-      cbEvents({ tipus: 'deflector', força: 1 });
+      cbEvents({ tipus: 'deflector', força: 1, pan });
       flaixDeflector(pla.posicio(pla.tC + 0.001).beta);
     }
     for (let s = 2; s < pla.segments.length; s++) {
       const seg = pla.segments[s];
       if (!T.emesos.saltFets.has(s) && t >= seg.t1) {
         T.emesos.saltFets.add(s);
-        cbEvents({ tipus: 'salt', força: 1 - (s - 2) * 0.25 });
+        cbEvents({ tipus: 'salt', força: 1 - (s - 2) * 0.25, pan });
       }
     }
     if (!T.emesos.assentada && t >= pla.tAssentament) {
       T.emesos.assentada = true;
-      cbEvents({ tipus: 'assentada' });
+      cbEvents({ tipus: 'assentada', pan });
+      /* ona expansiva curta al punt de l'assentament */
+      ones.push({
+        x: centre + Math.cos(p.beta) * R * p.radi,
+        y: centre + Math.sin(p.beta) * R * p.radi,
+        t0: performance.now(),
+      });
     }
-
-    W = pla.angleRoda(t);
-    const p = pla.posicio(t);
 
     /* clics contra els separadors: només quan la bola ja és a l'altura
        de les caselles; freqüència = velocitat relativa real */
@@ -3201,7 +3388,7 @@ const Anim = (() => {
       const cella = Math.floor(rel / roda.pas + 0.5) % roda.total;
       if (T.casellaPrevia !== null && cella !== T.casellaPrevia) {
         const velRel = Math.abs(p.velBola - pla.velRoda(t));
-        cbEvents({ tipus: 'clic', força: U.clamp(velRel / 9, 0.15, 1) });
+        cbEvents({ tipus: 'clic', força: U.clamp(velRel / 9, 0.15, 1), pan });
         flaixSeparador(rel);
       }
       T.casellaPrevia = cella;
@@ -3246,7 +3433,7 @@ const Anim = (() => {
     }
   }
   function calAnimar() {
-    return !!(tirada || flaixos.length || brillantors.length || trapa || bolaExtra);
+    return !!(tirada || flaixos.length || ones.length || brillantors.length || trapa || bolaExtra);
   }
   function fotograma(ara) {
     rafId = 0;
@@ -3256,11 +3443,16 @@ const Anim = (() => {
     if (tirada) {
       p = passaTirada(dt);
       if (tirada) pintaRoda();
+      const velRodaAra = tirada ? Math.abs(tirada.pla.velRoda(tirada.t)) : 0;
       Audio.fotogramaTirada(tirada ? {
-        velRoda: Math.abs(tirada.pla.velRoda(tirada.t)),
+        velRoda: velRodaAra,
         velBola: Math.abs(p ? p.velBola : 0),
         enPista: p ? p.radi > RD.pistaInt : false,
       } : null);
+      /* desenfocament de moviment quan la roda va de debò */
+      cnvRoda.classList.toggle('mou', velRodaAra > 3.1);
+    } else if (cnvRoda.classList.contains('mou')) {
+      cnvRoda.classList.remove('mou');
     }
 
     /* capa d'efectes */
@@ -3336,6 +3528,20 @@ const Anim = (() => {
     if (trapa) dibuixaTrapa(g);
 
     g.restore();
+
+    /* ones expansives dels impactes (coordenades absolutes) */
+    ones = ones.filter(o => araMs - o.t0 < 340);
+    for (const o of ones) {
+      const u = (araMs - o.t0) / 340;
+      g.save();
+      g.globalAlpha = (1 - u) * 0.55;
+      g.strokeStyle = '#ffe9b0';
+      g.lineWidth = Math.max(1, R * 0.006 * (1 - u));
+      g.beginPath();
+      g.ellipse(o.x, o.y, R * (0.015 + u * 0.075), R * (0.010 + u * 0.05), 0, 0, U.TAU);
+      g.stroke();
+      g.restore();
+    }
 
     /* la bola (coordenades absolutes del canvas) */
     if (tirada && p) {
@@ -3494,16 +3700,17 @@ const Audio = (() => {
     duc.gain.value = 1;
     duc.connect(mestre);
 
-    /* reverberació de sala: impuls generat (soroll amb caiguda exponencial) */
+    /* reverberació de sala: impuls generat (soroll amb caiguda
+       exponencial, 2,2 s: una sala gran amb cortinatges) */
     rev = ctx.createConvolver();
-    const durI = 1.6, n = Math.floor(ctx.sampleRate * durI);
+    const durI = 2.2, n = Math.floor(ctx.sampleRate * durI);
     const imp = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const d = imp.getChannelData(c);
-      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3.1);
     }
     rev.buffer = imp;
-    const gRev = ctx.createGain(); gRev.gain.value = 0.30;
+    const gRev = ctx.createGain(); gRev.gain.value = 0.28;
     rev.connect(gRev); gRev.connect(duc);
     revSend = ctx.createGain(); revSend.gain.value = 1;
     revSend.connect(rev);
@@ -3665,8 +3872,13 @@ const Audio = (() => {
     });
   }
 
-  function copSoroll(quan, freq, q, guany, decaïment, tipus = 'bandpass', reverb = 0.2) {
+  function copSoroll(quan, freq, q, guany, decaïment, tipus = 'bandpass', reverb = 0.2, pan = 0) {
     oneShot(quan, sortida => {
+      let cap = sortida;
+      if (pan && ctx.createStereoPanner) {
+        const p = ctx.createStereoPanner(); p.pan.value = U.clamp(pan, -1, 1);
+        p.connect(sortida); cap = p;
+      }
       if (reverb) ambReverb(sortida, reverb);
       const s = ctx.createBufferSource();
       s.buffer = sorollBuf;
@@ -3676,7 +3888,7 @@ const Audio = (() => {
       const g = ctx.createGain();
       g.gain.setValueAtTime(guany, quan);
       g.gain.exponentialRampToValueAtTime(0.0001, quan + decaïment);
-      s.connect(f); f.connect(g); g.connect(sortida);
+      s.connect(f); f.connect(g); g.connect(cap);
       s.start(quan); s.stop(quan + decaïment + 0.02);
       return [s];
     });
@@ -3707,14 +3919,15 @@ const Audio = (() => {
       gAmbient.gain.linearRampToValueAtTime(nivell, t + ms / 1000);
     },
 
-    clicSeparador(força) {
+    /* la posició estèreo segueix la bola per la roda */
+    clicSeparador(força, pan = 0) {
       if (!llest) return;
       const ara = performance.now();
       if (ara - tempsUltimClic < 24) return; // no saturem a alta velocitat
       tempsUltimClic = ara;
       const t = ctx.currentTime;
-      copSoroll(t, 3200 + força * 1800, 2.5, 0.05 + força * 0.10, 0.03, 'highpass', 0.12);
-      toMetall(t, U.visual(1900, 2400) + força * 700, 0.02 + força * 0.05, 0.045, U.visual(-0.3, 0.3), 0.1);
+      copSoroll(t, 3200 + força * 1800, 2.5, 0.05 + força * 0.10, 0.03, 'highpass', 0.12, pan);
+      toMetall(t, U.visual(1900, 2400) + força * 700, 0.02 + força * 0.05, 0.045, pan + U.visual(-0.1, 0.1), 0.1);
     },
     caigudaPista() {
       if (!llest) return;
@@ -3733,23 +3946,23 @@ const Audio = (() => {
       });
       copSoroll(t, 500, 1, 0.14, 0.09, 'lowpass', 0.3);
     },
-    rebotDeflector(força) {
+    rebotDeflector(força, pan = 0) {
       if (!llest) return;
       const t = ctx.currentTime;
-      toMetall(t, U.visual(2300, 2700), 0.16 * força, 0.16, 0, 0.4);
-      copSoroll(t, 1800, 1.8, 0.10 * força, 0.05, 'bandpass', 0.3);
+      toMetall(t, U.visual(2300, 2700), 0.16 * força, 0.16, pan, 0.4);
+      copSoroll(t, 1800, 1.8, 0.10 * força, 0.05, 'bandpass', 0.3, pan);
     },
-    saltCasella(força) {
+    saltCasella(força, pan = 0) {
       if (!llest) return;
       const t = ctx.currentTime;
-      copSoroll(t, 900, 1.2, 0.10 * força, 0.05, 'bandpass', 0.2);
-      toMetall(t, U.visual(1500, 1900), 0.05 * força, 0.06, 0, 0.15);
+      copSoroll(t, 900, 1.2, 0.10 * força, 0.05, 'bandpass', 0.2, pan);
+      toMetall(t, U.visual(1500, 1900), 0.05 * força, 0.06, pan, 0.15);
     },
-    assentament() {
+    assentament(pan = 0) {
       if (!llest) return;
       const t = ctx.currentTime;
-      copSoroll(t, 420, 1, 0.16, 0.10, 'lowpass', 0.35);
-      toMetall(t + 0.01, 1350, 0.07, 0.10, 0, 0.3);
+      copSoroll(t, 420, 1, 0.16, 0.10, 'lowpass', 0.35, pan);
+      toMetall(t + 0.01, 1350, 0.07, 0.10, pan, 0.3);
     },
     /* clic mecànic SEC sota la casella: el batec de suspens.
        Va directe al mestre, fora de l'atenuador: és l'únic so que
@@ -4523,6 +4736,7 @@ const Trampa = (() => {
       Audio.alarma(3);
       document.body.classList.add('emergencia');
       document.getElementById('app').classList.add('tremola-continu');
+      Cine.aberra(430); /* la lent es descompon: la taula s'ha espatllat */
     }
     /* el fons cedeix: fulles metàl·liques i la bola cau */
     await Anim.obreTrampa(idx);
@@ -4683,6 +4897,7 @@ const Celebracio = (() => {
           Audio.alarma(3);
           sacseja(true);
           Cine.copCamera(true);
+          Cine.aberra(360);
           document.body.classList.add('tema-zero');
           el.classList.add('fase-revela');
           Cine.carta(el.querySelector('.cel-carta'));
@@ -5028,6 +5243,7 @@ const UI = (() => {
   const $ = id => document.getElementById(id);
   let camp, placa, btnTirar, btnTirarText, croupierEl, avisEl, avisTimer = 0;
   let confirmaResol = null;
+  let reduitMoviment = false; // prefers-reduced-motion actiu al sistema
 
   /* textures per distingir colors semblants: la mateixa sèrie que a la roda */
   function texturaCss(i) {
@@ -5312,7 +5528,7 @@ const UI = (() => {
     $('ctrlCalma').addEventListener('click', () => {
       Estat.d.config.calma = !Estat.d.config.calma;
       $('ctrlCalma').setAttribute('aria-checked', String(Estat.d.config.calma));
-      document.body.classList.toggle('mode-calma', Estat.d.config.calma);
+      document.body.classList.toggle('mode-calma', Estat.d.config.calma || reduitMoviment);
       Estat.desa();
     });
     $('btnNovaSessio').addEventListener('click', async () => {
@@ -5394,7 +5610,11 @@ const UI = (() => {
     generaSoroll();
     entrada();
     refrescaSilenci();
-    document.body.classList.toggle('mode-calma', !!Estat.d.config.calma);
+    /* qui demana moviment reduït rep el mode calma visual, sense
+       tocar la seva configuració desada */
+    reduitMoviment = !!(window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    document.body.classList.toggle('mode-calma', !!Estat.d.config.calma || reduitMoviment);
 
     camp.addEventListener('input', () => {
       /* els salts de línia no aporten res dins la placa */
@@ -5406,6 +5626,12 @@ const UI = (() => {
     });
     btnTirar.addEventListener('click', () => Main.tirar());
     btnTirar.addEventListener('pointerenter', () => { if (!btnTirar.disabled) Audio.hoverBoto(); });
+    /* reflex especular del llautó que segueix el ratolí */
+    btnTirar.addEventListener('pointermove', e => {
+      const r = btnTirar.getBoundingClientRect();
+      btnTirar.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+      btnTirar.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+    });
     $('btnSilenci').addEventListener('click', commutaSilenci);
     $('btnRegistre').addEventListener('click', () => {
       if (Main.estat() !== 'repos') { avis('La bola és a la pista. El llibre s’obre quan la tirada acabi.'); return; }
@@ -5474,13 +5700,55 @@ const Cine = (() => {
       entra(el, { y: 30, scale: 0.94, opacity: 0 },
         { y: 0, scale: 1, opacity: 1, duration: 0.65, ease: 'power3.out' });
     },
-    /* el nom del guanyador: escala elàstica de debò */
+    /* el nom del guanyador: escala elàstica del conjunt i, a dins,
+       cada lletra es revela enfocant-se amb un petit desfasament */
     nom(el) {
       if (!on || !el) return;
       gsap.killTweensOf(el);
+      const text = el.textContent;
+      el.textContent = '';
+      const lletres = [];
+      for (const c of text) {
+        const s = document.createElement('span');
+        s.className = 'lletra';
+        s.textContent = c === ' ' ? ' ' : c;
+        el.appendChild(s);
+        lletres.push(s);
+      }
       gsap.fromTo(el,
         { scale: 0.12, opacity: 0 },
         { scale: 1, opacity: 1, duration: 1.15, ease: 'elastic.out(1, 0.38)' });
+      gsap.fromTo(lletres,
+        { opacity: 0, y: '0.4em', filter: 'blur(7px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5,
+          stagger: 0.045, ease: 'power2.out', delay: 0.1 });
+    },
+    /* empenta de càmera en tirar: la sala s'inclina cap a la roda */
+    preTirada() {
+      if (!on) return;
+      const mon = document.getElementById('mon3d');
+      gsap.killTweensOf(mon);
+      gsap.fromTo(mon, { scale: 1 },
+        { scale: 1.03, duration: 0.7, ease: 'power2.out',
+          yoyo: true, repeat: 1, clearProps: 'transform' });
+    },
+    /* sacsejada curta quan la bola pica un deflector (sincronitzada
+       amb el so): va a l'escenari per no barallar-se amb el zoom */
+    sacsejaCamera() {
+      if (!on) return;
+      const esc = document.getElementById('escenari');
+      gsap.killTweensOf(esc);
+      gsap.fromTo(esc, { x: 0, y: 0 },
+        { x: 4, y: -2, duration: 0.045, repeat: 5, yoyo: true,
+          ease: 'none', clearProps: 'transform' });
+    },
+    /* aberració cromàtica: un espasme de lent, mai més de mig segon.
+       No depèn de GSAP: és una classe amb un filtre SVG. */
+    aberra(ms) {
+      if (document.body.classList.contains('mode-calma')) return;
+      const app = document.getElementById('app');
+      app.classList.add('aberracio');
+      setTimeout(() => app.classList.remove('aberracio'), ms);
     },
     /* cop de càmera sobre la roda en el moment de l'impacte */
     copCamera(fort) {
@@ -5562,16 +5830,17 @@ const Main = (() => {
         Audio.ambientA(0.3, 1400); /* la sala calla, el mecanisme mana */
         break;
       case 'clic':
-        Audio.clicSeparador(ev.força);
+        Audio.clicSeparador(ev.força, ev.pan || 0);
         break;
       case 'deflector':
-        Audio.rebotDeflector(ev.força || 1);
+        Audio.rebotDeflector(ev.força || 1, ev.pan || 0);
+        Cine.sacsejaCamera();
         break;
       case 'salt':
-        Audio.saltCasella(ev.força || 1);
+        Audio.saltCasella(ev.força || 1, ev.pan || 0);
         break;
       case 'assentada':
-        Audio.assentament();
+        Audio.assentament(ev.pan || 0);
         break;
     }
   }
@@ -5597,6 +5866,7 @@ const Main = (() => {
     UI.segellaPlaca();
     UI.croupier('Faites vos jeux.');
     Audio.premBoto();
+    Cine.preTirada();
 
     /* la cadena sencera es decideix ARA, abans de moure res */
     const passos = planificaCadena(roda, Estat.d.config.probTrampa);
