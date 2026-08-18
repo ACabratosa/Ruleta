@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <title>Casino des Incidències · Taula Nº 04</title>
+<!-- Dependències en línia (CDN). Si no hi ha connexió, l'aplicació
+     continua funcionant amb fonts de sistema i transicions CSS. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23120f0b' stroke='%23b08d3b' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23b08d3b' stroke-width='2'/%3E%3Ccircle cx='32' cy='15' r='4' fill='%23f1e7cc'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23b08d3b'/%3E%3C/svg%3E">
 <style>
 /* ════════════════════════════════════════════════════════════════
@@ -26,8 +31,10 @@
   --tinta: #2E2417;
   --tinta-suau: #574834;
   --verd-jefe: #0E6B43;
-  --f-display: "Bodoni MT", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --f-cos: Constantia, Cambria, Georgia, serif;
+  /* Cinzel i Cormorant Garamond via CDN; les piles de sistema queden
+     de reserva per si no hi ha connexió */
+  --f-display: "Cinzel", "Bodoni MT", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --f-cos: "Cormorant Garamond", Constantia, Cambria, Georgia, serif;
   --f-mono: Consolas, "Cascadia Mono", monospace;
   --tilt: 54deg;
   --soroll: none; /* tessel·la de gra generada per codi en carregar */
@@ -642,6 +649,7 @@ body.emergencia #app::after {
   opacity: 1;
   animation: batecEmergencia 700ms ease-in-out infinite alternate;
 }
+body.mode-calma.emergencia #app::after { animation: none; opacity: .35; }
 @keyframes batecEmergencia {
   from { opacity: .25; }
   to   { opacity: 1; }
@@ -791,23 +799,18 @@ body.emergencia #app::after {
   transform: translateY(103%);
   transition: transform 480ms cubic-bezier(.3, .9, .3, 1);
   pointer-events: none;
-  background:
-    linear-gradient(180deg,
-      #0B3D2E 0% 5.1%, #0B3D2E 5.1% 7.9%,
-      #241710 7.9% 13.9%, #7a5a20 13.9% 14.5%,
-      #151009 14.5% 55%, #080503 100%);
+  background: #080503;
   box-shadow: 0 -18px 40px -12px rgba(0, 0, 0, .85);
-}
-#trampa::before { /* la vora del tapet, tallada */
-  content: '';
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  height: 5.1%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0) 65%);
 }
 #trampa.visible { transform: translateY(0); }
 #trampaEscena { position: absolute; inset: 0; }
-#trampaEscena svg { width: 100%; height: 100%; display: block; }
+#trampaEscena svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
 /* ─── Flaix (daurat / verd) ─── */
 #flaix {
@@ -1893,6 +1896,46 @@ body.mode-calma .bombeta { animation: none; opacity: .7; }
   .sala-pols, .cel-raigs { animation: none; }
   #app.tremola, #app.tremola-fort, #app.tremola-continu { animation: none; }
 }
+
+/* ─── Mètrica per a les fonts del CDN ───
+   Cinzel és més ampla que les serifes de sistema i Cormorant Garamond
+   corre petita: es reajusten cossos i traçats. Si les fonts no
+   carreguen, aquests valors continuen sent raonables amb la reserva. */
+body { font-size: 16px; }
+.casa { letter-spacing: .24em; text-indent: .24em; font-weight: 500; }
+.sala-linia { letter-spacing: .34em; text-indent: .34em; }
+.lema { font-size: 13.5px; }
+#campText { font-size: 18px; font-weight: 500; }
+.entrada-casa { letter-spacing: .28em; text-indent: .28em; }
+.entrada-sala { letter-spacing: .4em; text-indent: .4em; }
+#btnTirarText { letter-spacing: .18em; text-indent: .18em; }
+.btn-peu { letter-spacing: .22em; text-indent: .22em; }
+.lleg-nom { letter-spacing: .07em; }
+.cel-text { font-size: 18px; }
+.cel-frase { letter-spacing: .3em; text-indent: .3em; }
+.cel-ratxa { font-size: 15.5px; }
+#croupier { font-size: 14.5px; }
+.entrada-descripcio { font-size: 15px; }
+.fitxa-text { font-size: 18px; }
+.confirm-text { font-size: 15px; }
+.ajustos-etiqueta { font-size: 14.5px; }
+.ajustos-nota { font-size: 12.5px; }
+.llibre-titol { letter-spacing: .26em; text-indent: .26em; }
+.pestanya { letter-spacing: .22em; text-indent: .22em; }
+.cortina-retol { letter-spacing: .3em; text-indent: .3em; }
+.stats-taula td:first-child { letter-spacing: .1em; }
+.record-etiqueta { letter-spacing: .16em; }
+.pagina-blanca { font-size: 16.5px; }
+#avis { font-size: 15px; }
+
+/* ─── Coordinació amb la capa GSAP ───
+   Quan GSAP pren el control d'una entrada, el keyframe CSS equivalent
+   es retira perquè no es barallin els dos motors. */
+body.te-gsap #celebracio.fase-nom .cel-nom {
+  animation: none;
+  transform: none;
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -2145,6 +2188,10 @@ body.mode-calma .bombeta { animation: none; opacity: .7; }
 
 <!-- ═══ Avís de taula (no permet tirar, RNG absent, etc.) ═══ -->
 <div id="avis" aria-hidden="true" role="status"></div>
+<!-- GSAP per a la coreografia d'entrades i la cinematografia.
+     Càrrega síncrona abans del codi propi; si falla (sense connexió),
+     la capa Cine detecta l'absència i cau a les transicions CSS. -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script>
 'use strict';
 /* ════════════════════════════════════════════════════════════════
@@ -2544,18 +2591,19 @@ const Anim = (() => {
   }
 
   /* mides de lletra: es calculen UN COP aquí, mai dins del bucle */
+  const FONT_NOMS = '"Cinzel","Palatino Linotype",Georgia,serif';
   function calculaFonts() {
     if (!roda) return;
     const ctx = capOff.getContext('2d');
     const bandaNom = (RD.nomExt - RD.nomInt) * R - R * 0.028;
     fontsCache = { num: Math.round(R * 0.062), noms: new Map() };
-    const base = Math.round(R * 0.052);
+    const base = Math.round(R * 0.050);
     const provats = new Map();
     for (const c of roda.caselles) {
       const nom = c.propietari ? c.propietari.nom : Estat.d.jefe.nom;
       if (provats.has(nom)) continue;
       let f = base;
-      ctx.font = `${f}px ${'Constantia,Cambria,Georgia,serif'}`;
+      ctx.font = `600 ${f}px ${FONT_NOMS}`;
       let amp = ctx.measureText(nom.toUpperCase()).width;
       if (amp > bandaNom) f = Math.max(7, Math.floor(f * bandaNom / amp));
       provats.set(nom, f);
@@ -2795,7 +2843,7 @@ const Anim = (() => {
       g.save();
       g.rotate(i * pas);
       const f = fontsCache.noms.get(nom) || 10;
-      g.font = `${f}px Constantia,Cambria,Georgia,serif`;
+      g.font = `600 ${f}px ${FONT_NOMS}`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       const rMig = R * (RD.nomExt + RD.nomInt) / 2;
@@ -3513,6 +3561,17 @@ const Audio = (() => {
     const lfo2G = ctx.createGain(); lfo2G.gain.value = 0.006;
     lfo2.connect(lfo2G); lfo2G.connect(gMur.gain); lfo2.start();
 
+    /* pressió de sala: un subgreu quasi imperceptible que només es nota
+       quan desapareix (el batec de suspens) */
+    const pressio = ctx.createOscillator();
+    pressio.type = 'sine'; pressio.frequency.value = 52;
+    const gPressio = ctx.createGain(); gPressio.gain.value = 0.016;
+    pressio.connect(gPressio); gPressio.connect(gAmbient);
+    pressio.start();
+    const lfo3 = ctx.createOscillator(); lfo3.frequency.value = 0.031;
+    const lfo3G = ctx.createGain(); lfo3G.gain.value = 0.007;
+    lfo3.connect(lfo3G); lfo3G.connect(gPressio.gain); lfo3.start();
+
     /* repics de fitxes ocasionals, molt llunyans */
     const fitxa = () => {
       if (ctx.state === 'running' && duc.gain.value > 0.05) {
@@ -3638,6 +3697,14 @@ const Audio = (() => {
       duc.gain.cancelScheduledValues(t);
       duc.gain.setValueAtTime(duc.gain.value, t);
       duc.gain.linearRampToValueAtTime(nivell, t + ms / 1000);
+    },
+    /* només el llit ambiental: baixa progressivament als últims segons */
+    ambientA(nivell, ms) {
+      if (!llest) return;
+      const t = ctx.currentTime;
+      gAmbient.gain.cancelScheduledValues(t);
+      gAmbient.gain.setValueAtTime(gAmbient.gain.value, t);
+      gAmbient.gain.linearRampToValueAtTime(nivell, t + ms / 1000);
     },
 
     clicSeparador(força) {
@@ -3784,6 +3851,22 @@ const Audio = (() => {
         return [o];
       });
       copSoroll(t, 1100, 0.8, 0.2, 0.10, 'bandpass', 0.3);
+      /* el tub ressona un instant després de l'expulsió */
+      oneShot(t + 0.08, sortida => {
+        ambReverb(sortida, 0.5);
+        const s = ctx.createBufferSource();
+        s.buffer = sorollBuf;
+        const f = ctx.createBiquadFilter();
+        f.type = 'bandpass'; f.Q.value = 9;
+        f.frequency.setValueAtTime(760, t + 0.08);
+        f.frequency.exponentialRampToValueAtTime(340, t + 0.5);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.09, t + 0.08);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+        s.connect(f); f.connect(g); g.connect(sortida);
+        s.start(t + 0.08); s.stop(t + 0.6);
+        return [s];
+      });
     },
     alarma(nivell) {
       if (!llest) return;
@@ -3830,14 +3913,16 @@ const Audio = (() => {
     cascadaMonedes(durS, intensitat) {
       if (!llest) return;
       const t0 = ctx.currentTime + 0.03;
-      const nombre = Math.round(95 * intensitat);
+      const nombre = Math.round(120 * intensitat);
       for (let i = 0; i < nombre; i++) {
         /* densitat: creix de cop, es manté i decau amb cua */
         const u = i / nombre;
         const tt = t0 + Math.pow(u, 0.82) * durS + U.visual(0, 0.10);
         const f = U.visual(2100, 5600) * (1 - 0.15 * u);
-        toMetall(tt, f, U.visual(0.020, 0.056) * (1 - 0.4 * u), U.visual(0.05, 0.14), U.visual(-0.9, 0.9), 0.5);
+        toMetall(tt, f, U.visual(0.020, 0.052) * (1 - 0.4 * u), U.visual(0.05, 0.14), U.visual(-0.9, 0.9), 0.5);
         if (i % 6 === 0) copSoroll(tt + 0.01, U.visual(380, 560), 1, 0.05, 0.07, 'lowpass', 0.4);
+        /* purpurina: partials molt aguts i molt fluixos per sobre del doll */
+        if (i % 7 === 3) toMetall(tt + 0.02, U.visual(6200, 9200), 0.008, 0.20, U.visual(-1, 1), 0.7);
       }
       /* remor greu del munt de monedes creixent */
       oneShot(t0, sortida => {
@@ -3965,6 +4050,7 @@ const Particules = (() => {
       fase: U.visual(0, U.TAU),        // rotació sobre l'eix propi
       velFase: U.visual(5, 13) * (Math.random() < 0.5 ? -1 : 1),
       inclinacio: U.visual(-0.5, 0.5), // inclinació de l'el·lipse en pantalla
+      brilla: Math.random() < 0.3,     // algunes atrapen el focus de la sala
       vida: 0, vidaMax: U.visual(2.6, 4.2),
     };
   }
@@ -3996,8 +4082,8 @@ const Particules = (() => {
       vida: 0, vidaMax: 2.4,
     };
   }
-  function espurna(x, y, verd) {
-    const a = U.visual(0, U.TAU), v = U.visual(60, 330);
+  function espurna(x, y, verd, micro) {
+    const a = U.visual(0, U.TAU), v = micro ? U.visual(20, 90) : U.visual(60, 330);
     return {
       tipus: 'espurna',
       x, y,
@@ -4006,7 +4092,10 @@ const Particules = (() => {
       color: verd
         ? U.tria(['#9af0c0', '#4ed08b', '#d2f5e0', '#e8d590'])
         : U.tria(['#ffe9a8', '#ffcf70', '#fff6dd', '#f0a860']),
-      vida: 0, vidaMax: U.visual(0.7, 1.5),
+      /* algunes guspires crepiten en morir: petita segona explosió */
+      crepita: !micro && Math.random() < 0.22,
+      verd,
+      vida: 0, vidaMax: micro ? U.visual(0.25, 0.45) : U.visual(0.7, 1.5),
     };
   }
 
@@ -4089,6 +4178,12 @@ const Particules = (() => {
           p.cua.push({ x: p.x, y: p.y });
           if (p.cua.length > 6) p.cua.shift();
         }
+        if (p.crepita && p.vida > p.vidaMax * 0.72) {
+          p.crepita = false;
+          if (!degradat && actives.length + noves.length < limit()) {
+            for (let k = 0; k < 3; k++) noves.push(espurna(p.x, p.y, p.verd, true));
+          }
+        }
       }
     }
     actives = actives.concat(noves).filter(p =>
@@ -4107,6 +4202,7 @@ const Particules = (() => {
         g.translate(p.x, p.y);
         g.rotate(p.inclinacio);
         g.globalAlpha = desapareix;
+        if (p.brilla && !degradat) { g.shadowColor = 'rgba(255,220,130,.8)'; g.shadowBlur = 9; }
         if (gruix < 0.22) {
           /* de perfil: només el cantell, amb lluentor especular */
           g.fillStyle = '#fff3c9';
@@ -4146,17 +4242,19 @@ const Particules = (() => {
         g.restore();
       } else if (p.tipus === 'coet') {
         g.save();
-        g.globalAlpha = 0.85;
+        g.globalAlpha = 0.9;
+        g.lineCap = 'round';
         for (let i = 1; i < p.cua.length; i++) {
-          g.strokeStyle = p.verd ? 'rgba(120,230,170,0.5)' : 'rgba(255,220,140,0.5)';
-          g.lineWidth = 2 * (i / p.cua.length);
+          g.strokeStyle = p.verd ? 'rgba(120,230,170,0.55)' : 'rgba(255,214,130,0.55)';
+          g.lineWidth = 3.2 * (i / p.cua.length);
           g.beginPath();
           g.moveTo(p.cua[i - 1].x, p.cua[i - 1].y);
           g.lineTo(p.cua[i].x, p.cua[i].y);
           g.stroke();
         }
+        g.shadowColor = 'rgba(255,230,160,.9)'; g.shadowBlur = 8;
         g.fillStyle = '#fff8e0';
-        g.beginPath(); g.arc(p.x, p.y, 2.2, 0, U.TAU); g.fill();
+        g.beginPath(); g.arc(p.x, p.y, 2.8, 0, U.TAU); g.fill();
         g.restore();
       } else if (p.tipus === 'espurna') {
         g.save();
@@ -4221,16 +4319,30 @@ const Trampa = (() => {
     elL2 = elBanner.querySelector('.banner-linia2');
   }
 
-  /* construeix l'escena de tall (un cop; es reutilitza) */
+  /* construeix l'escena de tall (un cop; es reutilitza).
+     Dos SVG sobreposats: el primer, amb preserveAspectRatio="none",
+     estira les franges horitzontals del tall (tapet, fusta, foscor)
+     fins a les vores de la pantalla; el segon, proporcionat, duu la
+     maquinària. Totes dues comparteixen l'escala vertical, així que
+     les franges continuen sense costures. */
   function construeix() {
     if (svgBola) return;
     elEscena.innerHTML = `
-<svg viewBox="0 0 1000 430" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+<svg class="trampa-fons" viewBox="0 0 100 430" preserveAspectRatio="none" aria-hidden="true">
   <defs>
     <linearGradient id="tFons" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#151009"/>
       <stop offset="1" stop-color="#080503"/>
     </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="100" height="430" fill="url(#tFons)"/>
+  <rect x="0" y="22" width="100" height="12" fill="#0B3D2E"/>
+  <rect x="0" y="22" width="100" height="4" fill="#14503d"/>
+  <rect x="0" y="34" width="100" height="28" fill="#241710"/>
+  <rect x="0" y="60" width="100" height="2.5" fill="#7a5a20" opacity=".7"/>
+</svg>
+<svg viewBox="0 0 1000 430" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+  <defs>
     <linearGradient id="tLlauto" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#d9ba68"/>
       <stop offset=".5" stop-color="#8a6a22"/>
@@ -4246,13 +4358,6 @@ const Trampa = (() => {
       <stop offset="1" stop-color="rgba(255,200,90,0)"/>
     </radialGradient>
   </defs>
-
-  <rect x="0" y="0" width="1000" height="430" fill="url(#tFons)"/>
-
-  <!-- tall de la taula: tapet i gruix de fusta -->
-  <rect x="0" y="22" width="1000" height="12" fill="#0B3D2E"/>
-  <rect x="0" y="34" width="1000" height="28" fill="#241710"/>
-  <rect x="0" y="60" width="1000" height="2.5" fill="#7a5a20" opacity=".7"/>
 
   <!-- pou del bol de la ruleta, vist en tall -->
   <path d="M250,62 Q410,150 570,62 Z" fill="#1c1209" stroke="#8a6a22" stroke-width="2"/>
@@ -4291,7 +4396,7 @@ const Trampa = (() => {
   <text x="18" y="418" font-size="10" letter-spacing="3" fill="#B9AA88" opacity=".4"
         font-family="Georgia,serif">SOTA LA TAULA · RETORN PNEUMÀTIC</text>
 </svg>`;
-    const svg = elEscena.querySelector('svg');
+    const svg = elEscena.querySelectorAll('svg')[1];
     camí1 = svg.querySelector('#tCami1');
     camí2 = svg.querySelector('#tCami2');
     svgBola = svg.querySelector('#tBolaG');
@@ -4405,6 +4510,7 @@ const Trampa = (() => {
       : nivell === 2 ? 'LA TAULA INSISTEIX'
       : 'REVISEU EL MECANISME';
     elBanner.classList.add('visible');
+    Cine.banner(elBanner);
   }
 
   /* ─── seqüència completa d'una trampa ───
@@ -4576,16 +4682,18 @@ const Celebracio = (() => {
           Audio.impacte();
           Audio.alarma(3);
           sacseja(true);
+          Cine.copCamera(true);
           document.body.classList.add('tema-zero');
           el.classList.add('fase-revela');
+          Cine.carta(el.querySelector('.cel-carta'));
         }, 1050);
-        t(() => el.classList.add('fase-nom'), 1900);
+        t(() => { el.classList.add('fase-nom'); Cine.nom(elNom); }, 1900);
         t(() => {
           el.classList.add('fase-celebra');
           Particules.celebra({ zero: true, calma });
-          Audio.cascadaMonedes(calma ? 3.5 : 5.5, calma ? 0.4 : 1.15);
+          Audio.cascadaMonedes(calma ? 3.5 : 6.6, calma ? 0.4 : 1.3);
           Audio.fanfarria(true);
-          Audio.ovacio(calma ? 3 : 6);
+          Audio.ovacio(calma ? 3 : 7);
           rodaOdometre(total);
           tancable = true;
         }, 3100);
@@ -4595,18 +4703,22 @@ const Celebracio = (() => {
         Audio.impacte();
         flaix(false);
         sacseja(ratxa >= 3);
+        Cine.copCamera(ratxa >= 3);
         el.classList.add('visible');
         el.setAttribute('aria-hidden', 'false');
         /* REVELACIÓ: 0,5 - 3 s — cada element amb el seu aire */
-        t(() => el.classList.add('fase-revela'), 420);
-        t(() => el.classList.add('fase-nom'), 1550);
+        t(() => {
+          el.classList.add('fase-revela');
+          Cine.carta(el.querySelector('.cel-carta'));
+        }, 420);
+        t(() => { el.classList.add('fase-nom'); Cine.nom(elNom); }, 1550);
         /* CELEBRACIÓ: 3 s → */
         t(() => {
           el.classList.add('fase-celebra');
           Particules.celebra({ zero: false, calma });
-          Audio.cascadaMonedes(calma ? 3.5 : 5.2, calma ? 0.4 : 1);
+          Audio.cascadaMonedes(calma ? 3.5 : 6.2, calma ? 0.4 : 1.1);
           Audio.fanfarria(false);
-          Audio.ovacio(calma ? 3 : 5.5);
+          Audio.ovacio(calma ? 3 : 6);
           rodaOdometre(total);
           tancable = true;
         }, 2950);
@@ -4662,6 +4774,7 @@ const Registre = (() => {
     triaPestanya(pestanyaActiva, true);
     el.classList.add('visible');
     el.setAttribute('aria-hidden', 'false');
+    Cine.llibre(el.querySelector('.llibre'));
   }
   function tanca() {
     el.classList.remove('visible');
@@ -4748,6 +4861,7 @@ const Registre = (() => {
     document.getElementById('fitxaHora').textContent = U.horaSegons(e.timestamp);
     elFitxa.classList.add('visible');
     elFitxa.setAttribute('aria-hidden', 'false');
+    Cine.fitxa(elFitxa.querySelector('.fitxa-placa'));
   }
   function tancaFitxa() {
     elFitxa.classList.remove('visible');
@@ -5032,8 +5146,10 @@ const UI = (() => {
   function avis(text, ms = 3200) {
     clearTimeout(avisTimer);
     avisEl.textContent = text;
+    const nou = !avisEl.classList.contains('visible');
     avisEl.classList.add('visible');
     avisEl.classList.remove('persistent');
+    if (nou) Cine.avis(avisEl);
     avisTimer = setTimeout(() => avisEl.classList.remove('visible'), ms);
   }
   function avisPersistent(text) {
@@ -5051,6 +5167,7 @@ const UI = (() => {
       $('confirmAccepta').textContent = boto || 'CONFIRMAR';
       $('confirmacio').classList.add('visible');
       $('confirmacio').setAttribute('aria-hidden', 'false');
+      Cine.confirmacio($('confirmacio').querySelector('.confirm-placa'));
       $('confirmAccepta').focus();
     });
   }
@@ -5068,6 +5185,7 @@ const UI = (() => {
     pintaAjustos();
     ajustosEl().classList.add('visible');
     ajustosEl().setAttribute('aria-hidden', 'false');
+    Cine.calaix(ajustosEl().querySelector('.ajustos-panell'));
   }
   function tancaAjustos() {
     ajustosEl().classList.remove('visible');
@@ -5208,6 +5326,7 @@ const UI = (() => {
         `S'OBRE LA SESSIÓ #${U.dosDigits(Estat.d.sessio + 1)}`;
       cortina.classList.add('visible');
       cortina.setAttribute('aria-hidden', 'false');
+      Cine.cortina(cortina.querySelector('.cortina-retol'));
       setTimeout(() => {
         Estat.novaSessio();
         refrescaComptadors();
@@ -5323,6 +5442,86 @@ const UI = (() => {
   };
 })();
 /* ════════════════════════════════════════════════════════════════
+   CINE — capa de coreografia amb GSAP (CDN)
+   Només presentació: entrades d'elements, cops de càmera, elasticitat.
+   Si GSAP no ha carregat (sense connexió), tot cau en silenci a les
+   transicions CSS existents: cap funcionalitat en depèn.
+   ════════════════════════════════════════════════════════════════ */
+const Cine = (() => {
+  const on = typeof window.gsap !== 'undefined';
+  if (on) document.body.classList.add('te-gsap');
+
+  /* entrada genèrica: suspèn la transició CSS mentre dura el tween i
+     neteja les propietats en acabar perquè el CSS recuperi el control */
+  function entra(el, de, a) {
+    if (!on || !el) return;
+    const tr = el.style.transition;
+    el.style.transition = 'none';
+    gsap.killTweensOf(el);
+    gsap.fromTo(el, de, Object.assign({}, a, {
+      onComplete() {
+        gsap.set(el, { clearProps: 'transform,opacity' });
+        requestAnimationFrame(() => { el.style.transition = tr; });
+      },
+    }));
+  }
+
+  return {
+    on,
+
+    /* la carta de la celebració apareix amb pes */
+    carta(el) {
+      entra(el, { y: 30, scale: 0.94, opacity: 0 },
+        { y: 0, scale: 1, opacity: 1, duration: 0.65, ease: 'power3.out' });
+    },
+    /* el nom del guanyador: escala elàstica de debò */
+    nom(el) {
+      if (!on || !el) return;
+      gsap.killTweensOf(el);
+      gsap.fromTo(el,
+        { scale: 0.12, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 1.15, ease: 'elastic.out(1, 0.38)' });
+    },
+    /* cop de càmera sobre la roda en el moment de l'impacte */
+    copCamera(fort) {
+      if (!on) return;
+      const mon = document.getElementById('mon3d');
+      gsap.killTweensOf(mon);
+      gsap.fromTo(mon, { scale: fort ? 1.14 : 1.09 },
+        { scale: 1, duration: fort ? 0.85 : 0.6, ease: 'power2.out', clearProps: 'transform' });
+    },
+    llibre(el) {
+      entra(el, { y: 36, scale: 0.975, opacity: 0 },
+        { y: 0, scale: 1, opacity: 1, duration: 0.55, ease: 'power3.out' });
+    },
+    calaix(el) {
+      entra(el, { x: 64, opacity: 0.5 },
+        { x: 0, opacity: 1, duration: 0.5, ease: 'power3.out' });
+    },
+    fitxa(el) {
+      entra(el, { scale: 0.9, y: 14, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.45, ease: 'back.out(1.7)' });
+    },
+    banner(el) {
+      entra(el, { scale: 1.42, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.34, ease: 'back.out(2.1)' });
+    },
+    confirmacio(el) {
+      entra(el, { scale: 0.92, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.8)' });
+    },
+    cortina(retol) {
+      entra(retol, { letterSpacing: '0.62em', opacity: 0, y: 16 },
+        { letterSpacing: '0.3em', opacity: 1, y: 0, duration: 1.05, ease: 'power2.out' });
+    },
+    avis(el) {
+      /* el toast es centra amb translateX(-50%): es conserva al tween */
+      entra(el, { y: 10, opacity: 0, xPercent: -50 },
+        { y: 0, opacity: 1, xPercent: -50, duration: 0.3, ease: 'power2.out' });
+    },
+  };
+})();
+/* ════════════════════════════════════════════════════════════════
    ORQUESTRADOR — el flux de la incidència
    Escriure → tirar → (trampa?) → assignar → desar al registre
    ════════════════════════════════════════════════════════════════ */
@@ -5360,6 +5559,7 @@ const Main = (() => {
       case 'ultims':
         document.body.classList.add('final-tirada');
         UI.croupier('No hi ha marxa enrere.');
+        Audio.ambientA(0.3, 1400); /* la sala calla, el mecanisme mana */
         break;
       case 'clic':
         Audio.clicSeparador(ev.força);
@@ -5465,6 +5665,7 @@ const Main = (() => {
       document.body.classList.remove('final-tirada', 'emergencia');
       document.getElementById('app').classList.remove('tremola-continu');
       Audio.ducA(1, 400);
+      Audio.ambientA(1, 900);
       UI.desegellaPlaca();
       UI.refresca();
       if (Registre.oberta()) Registre.pintaLlista();
@@ -5494,6 +5695,10 @@ const Main = (() => {
     Anim.redimensiona();
     /* el primer càlcul de mida pot arribar abans que la graella assenti */
     requestAnimationFrame(() => Anim.redimensiona());
+    /* quan arriben les fonts del CDN, la roda es redibuixa amb elles */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => Anim.reconstrueix());
+    }
 
     let timerMida = 0;
     window.addEventListener('resize', () => {
