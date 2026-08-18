@@ -213,6 +213,7 @@ const Trampa = (() => {
      idx: casella on la bola s'havia assentat
      nivell: 1a, 2a, 3a… trampa seguida dins de la mateixa tirada */
   async function executa(idx, nivell, esJefe) {
+    construeix(); /* l'escena del tub ha d'existir ABANS que el panell pugi */
     banner(nivell, esJefe);
     if (nivell === 2) { Audio.alarma(2); document.body.classList.add('emergencia'); }
     if (nivell >= 3) {
