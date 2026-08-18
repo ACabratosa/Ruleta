@@ -9,18 +9,18 @@ const COLOR_JEFE = '#0E6B43';
 
 /* Paleta de la casa per als participants — el verd queda reservat al Jefe */
 const PALETA = [
-  { nom: 'Granat',    hex: '#8C2F39' },
-  { nom: 'Safir',     hex: '#2F4E7E' },
-  { nom: 'Pruna',     hex: '#6B4487' },
-  { nom: 'Coure',     hex: '#A85C28' },
-  { nom: 'Bordeus',   hex: '#5C2130' },
-  { nom: 'Blau nit',  hex: '#23395C' },
-  { nom: 'Magenta',   hex: '#8E2F63' },
-  { nom: 'Terracota', hex: '#B04F2F' },
-  { nom: 'Acer',      hex: '#4E6274' },
-  { nom: 'Or vell',   hex: '#96772A' },
-  { nom: 'Lila fosc', hex: '#4C3A73' },
-  { nom: 'Carmí',     hex: '#A03040' },
+  { nom: 'Granat',    hex: '#98262E' },
+  { nom: 'Safir',     hex: '#2E5C94' },
+  { nom: 'Pruna',     hex: '#7A4694' },
+  { nom: 'Coure',     hex: '#B45B22' },
+  { nom: 'Bordeus',   hex: '#6E2436' },
+  { nom: 'Blau nit',  hex: '#274B78' },
+  { nom: 'Magenta',   hex: '#A0336E' },
+  { nom: 'Terracota', hex: '#B8442A' },
+  { nom: 'Acer',      hex: '#55708C' },
+  { nom: 'Or vell',   hex: '#9C7C2C' },
+  { nom: 'Lila fosc', hex: '#5A4390' },
+  { nom: 'Carmí',     hex: '#B03348' },
 ];
 
 const Estat = (() => {
@@ -30,10 +30,10 @@ const Estat = (() => {
   const defecte = () => ({
     v: 1,
     participants: [
-      { id: 'p1', nom: 'Arnau',   color: '#8C2F39', absent: false },
-      { id: 'p2', nom: 'Barroso', color: '#2F4E7E', absent: false },
-      { id: 'p3', nom: 'Culex',   color: '#6B4487', absent: false },
-      { id: 'p4', nom: 'Stalin',  color: '#A85C28', absent: false },
+      { id: 'p1', nom: 'Arnau',   color: '#98262E', absent: false },
+      { id: 'p2', nom: 'Barroso', color: '#2E5C94', absent: false },
+      { id: 'p3', nom: 'Culex',   color: '#7A4694', absent: false },
+      { id: 'p4', nom: 'Stalin',  color: '#B45B22', absent: false },
     ],
     jefe: { nom: 'Jefe' },
     sessio: 1,

@@ -1432,3 +1432,41 @@ body.mode-calma #app.aberracio { filter: none; }
 #mon3d { position: relative; }
 #cnv3d { position: absolute; inset: 0; display: block; }
 body.mode-3d #plaRoda { display: none; }
+
+/* ════════════════════════════════════════════════════════════════
+   PASSADA DE CONTRAST I LLEGIBILITAT
+   Tots els texts secundaris pugen de presència; cap informació
+   depèn d'un to que es fongui amb el fons.
+   ════════════════════════════════════════════════════════════════ */
+.lema { opacity: .8; }
+.compt-etiqueta { opacity: .85; }
+.compt-xifra {
+  color: var(--llauto3);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .8), 0 0 12px rgba(210, 177, 90, .3);
+}
+#croupier { color: var(--ivori1); opacity: .9; }
+.btn-peu { color: var(--llauto3); }
+#campText::placeholder { color: rgba(70, 52, 16, .75); }
+.placa-compt { color: #43340e; }
+#placaTitol { color: #33250a; }
+.lleg-nom small { opacity: .85; }
+.lleg-fila { border-color: rgba(150, 114, 44, .5); }
+.cel-ratxa { color: var(--ivori1); }
+.cel-odometre-etiqueta { opacity: .9; }
+.cel-tancar { color: var(--ivori1); }
+#celebracio.fase-celebra .cel-tancar { opacity: .7; }
+.entrada-cadena { color: #6e3f14; }
+.record-etiqueta { opacity: .95; }
+.ajustos-seccio-titol { color: var(--llauto2); }
+.ajustos-nota { opacity: .85; }
+.ajustos-etiqueta small { opacity: .85; }
+.sessio-etiqueta { color: var(--tinta); opacity: .75; }
+.stats-taula th { color: var(--tinta); opacity: .75; }
+.banner-linia2 { color: var(--llauto3); }
+.cortina-sub { color: var(--llauto3); }
+/* el focus càlid del centre de la taula, una mica més amable */
+.sala-vinyeta {
+  background:
+    radial-gradient(ellipse 62% 54% at 50% 46%, rgba(255, 216, 145, .10) 0%, rgba(255, 216, 145, 0) 62%),
+    radial-gradient(ellipse 120% 105% at 50% 45%, rgba(0, 0, 0, 0) 44%, rgba(2, 4, 3, .5) 78%, rgba(0, 0, 0, .9) 100%);
+}

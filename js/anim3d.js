@@ -241,7 +241,7 @@ const Anim3D = (() => {
        mapatge identitat. La zona transparent del canvas més enllà de
        l'anell de noms es retalla amb alphaTest. */
     const matAnell = new T.MeshStandardMaterial({
-      map: texCap, metalness: 0.12, roughness: 0.46, envMapIntensity: 0.65,
+      map: texCap, metalness: 0.06, roughness: 0.52, envMapIntensity: 0.4,
       transparent: true, alphaTest: 0.35,
     });
     anellCap = new T.Mesh(new T.RingGeometry(RD.eix * 0.9, 1.0, 164, 1), matAnell);

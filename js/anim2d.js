@@ -93,7 +93,7 @@ const Anim = (() => {
       const nom = c.propietari ? c.propietari.nom : Estat.d.jefe.nom;
       if (provats.has(nom)) continue;
       let f = base;
-      ctx.font = `600 ${f}px ${FONT_NOMS}`;
+      ctx.font = `700 ${f}px ${FONT_NOMS}`;
       let amp = ctx.measureText(nom.toUpperCase()).width;
       if (amp > bandaNom) f = Math.max(7, Math.floor(f * bandaNom / amp));
       provats.set(nom, f);
@@ -305,7 +305,7 @@ const Anim = (() => {
       g.arc(0, 0, R * RD.nomExt, a0, a1);
       g.arc(0, 0, R * RD.nomInt, a1, a0, true);
       g.closePath();
-      g.fillStyle = ombreja(color, 0.75);
+      g.fillStyle = ombreja(color, 0.82);
       g.fill();
       if (iPart >= 0) { g.save(); g.clip(); g.fillStyle = patroPer(iPart, g); g.fillRect(-R, -R, 2 * R, 2 * R); g.restore(); }
 
@@ -315,9 +315,9 @@ const Anim = (() => {
       g.arc(0, 0, R * RD.cellaInt, a1, a0, true);
       g.closePath();
       const grad = g.createRadialGradient(0, 0, R * RD.cellaInt, 0, 0, R * RD.cellaExt);
-      grad.addColorStop(0, ombreja(color, 0.8));
+      grad.addColorStop(0, ombreja(color, 0.9));
       grad.addColorStop(0.75, color);
-      grad.addColorStop(1, ombreja(color, 0.85));
+      grad.addColorStop(1, ombreja(color, 0.93));
       g.fillStyle = grad;
       g.fill();
       if (iPart >= 0) { g.save(); g.clip(); g.fillStyle = patroPer(iPart, g); g.fillRect(-R, -R, 2 * R, 2 * R); g.restore(); }
@@ -334,12 +334,15 @@ const Anim = (() => {
       g.rotate(i * pas);
       g.translate(R * RD.num, 0);
       g.rotate(-Math.PI / 2);
-      g.font = `${fontsCache.num}px Consolas,"Cascadia Mono",monospace`;
+      g.font = `700 ${fontsCache.num}px Consolas,"Cascadia Mono",monospace`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
-      g.fillStyle = 'rgba(0,0,0,0.4)';
-      g.fillText(String(c.num), 0.8, 1.4);
-      g.fillStyle = '#F1E7CC';
+      /* contorn fosc: el número aguanta sobre qualsevol color de fons */
+      g.lineJoin = 'round';
+      g.strokeStyle = 'rgba(16,10,4,0.85)';
+      g.lineWidth = Math.max(2, fontsCache.num * 0.16);
+      g.strokeText(String(c.num), 0, 0);
+      g.fillStyle = '#F8EFD6';
       g.fillText(String(c.num), 0, 0);
       g.restore();
 
@@ -347,14 +350,16 @@ const Anim = (() => {
       g.save();
       g.rotate(i * pas);
       const f = fontsCache.noms.get(nom) || 10;
-      g.font = `600 ${f}px ${FONT_NOMS}`;
+      g.font = `700 ${f}px ${FONT_NOMS}`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       const rMig = R * (RD.nomExt + RD.nomInt) / 2;
       g.translate(rMig, 0);
-      g.fillStyle = 'rgba(0,0,0,0.35)';
-      g.fillText(nom.toUpperCase(), 0.6, 1);
-      g.fillStyle = 'rgba(241,231,204,0.92)';
+      g.lineJoin = 'round';
+      g.strokeStyle = 'rgba(14,9,4,0.8)';
+      g.lineWidth = Math.max(1.6, f * 0.16);
+      g.strokeText(nom.toUpperCase(), 0, 0);
+      g.fillStyle = 'rgba(250,243,222,0.98)';
       g.fillText(nom.toUpperCase(), 0, 0);
       g.restore();
     }
