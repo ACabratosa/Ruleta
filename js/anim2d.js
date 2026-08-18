@@ -86,8 +86,8 @@ const Anim = (() => {
     if (!roda) return;
     const ctx = capOff.getContext('2d');
     const bandaNom = (RD.nomExt - RD.nomInt) * R - R * 0.028;
-    fontsCache = { num: Math.round(R * 0.062), noms: new Map() };
-    const base = Math.round(R * 0.050);
+    fontsCache = { num: Math.round(R * 0.070), noms: new Map() };
+    const base = Math.round(R * 0.056);
     const provats = new Map();
     for (const c of roda.caselles) {
       const nom = c.propietari ? c.propietari.nom : Estat.d.jefe.nom;
@@ -275,10 +275,13 @@ const Anim = (() => {
 
   /* ─── El cap giratori, dibuixat fora de pantalla ─── */
   function dibuixaCap() {
+    /* la roda 3D reutilitza aquest canvas com a textura: es pinta
+       sempre amb un mínim de supersampling perquè no perdi nitidesa */
+    const escalaCap = Math.max(escala, 2);
     capOff = document.createElement('canvas');
-    capOff.width = capOff.height = Math.round(midaCss * escala);
+    capOff.width = capOff.height = Math.round(midaCss * escalaCap);
     const g = capOff.getContext('2d');
-    g.setTransform(escala, 0, 0, escala, 0, 0);
+    g.setTransform(escalaCap, 0, 0, escalaCap, 0, 0);
     g.translate(centre, centre);
     if (!roda) return;
     calculaFonts();
@@ -302,7 +305,7 @@ const Anim = (() => {
       g.arc(0, 0, R * RD.nomExt, a0, a1);
       g.arc(0, 0, R * RD.nomInt, a1, a0, true);
       g.closePath();
-      g.fillStyle = ombreja(color, 0.62);
+      g.fillStyle = ombreja(color, 0.75);
       g.fill();
       if (iPart >= 0) { g.save(); g.clip(); g.fillStyle = patroPer(iPart, g); g.fillRect(-R, -R, 2 * R, 2 * R); g.restore(); }
 

@@ -222,7 +222,7 @@ const Trampa = (() => {
       Cine.aberra(430); /* la lent es descompon: la taula s'ha espatllat */
     }
     /* el fons cedeix: fulles metàl·liques i la bola cau */
-    await Anim.obreTrampa(idx);
+    await MotorRoda.obreTrampa(idx);
     /* vista de tall, la roda queda un instant amb el forat obert */
     elPanell.classList.add('visible');
     elPanell.setAttribute('aria-hidden', 'false');
@@ -232,7 +232,7 @@ const Trampa = (() => {
        tanquen darrere seu mentre la tirada recomença */
     elPanell.classList.remove('visible');
     elPanell.setAttribute('aria-hidden', 'true');
-    Anim.tancaTrampa();
+    MotorRoda.tancaTrampa();
     setTimeout(() => {
       elBanner.classList.remove('visible');
       document.body.classList.remove('emergencia');

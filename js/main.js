@@ -2,6 +2,12 @@
    ORQUESTRADOR — el flux de la incidència
    Escriure → tirar → (trampa?) → assignar → desar al registre
    ════════════════════════════════════════════════════════════════ */
+
+/* El motor de la roda: Anim (canvas 2D, sempre disponible) o Anim3D
+   (Three.js, si el CDN ha carregat). Tots dos parlen la mateixa API i
+   comparteixen la física de js/fisica.js. */
+let MotorRoda = null;
+
 const Main = (() => {
   let estat = 'repos';          // repos | tirant
   let roda = null;
@@ -12,7 +18,7 @@ const Main = (() => {
     /* amb la taula tancada (0 actius) es mostra la roda de tothom */
     if (!actius.length) actius = Estat.d.participants;
     roda = generaRoda(actius);
-    Anim.reconstrueix(roda);
+    MotorRoda.reconstrueix(roda);
     UI.refresca();
   }
 
@@ -23,7 +29,7 @@ const Main = (() => {
   async function batec(idx) {
     await espera(230);
     Audio.clicMecanic();               // sec, fora de l'atenuador
-    Anim.brillaJuntura(idx, 340);
+    MotorRoda.brillaJuntura(idx, 340);
     Audio.ducA(0, 200);                // cau tot l'ambient: silenci real
     await espera(660 + U.visual(0, 140));
   }
@@ -92,7 +98,7 @@ const Main = (() => {
           if (estat === 'tirant') UI.croupier('La sort està decidida...');
         }, 1600);
 
-        await Anim.tira(pas.idx, durada, gestorEvents);
+        await MotorRoda.tira(pas.idx, durada, gestorEvents);
         document.body.classList.remove('final-tirada');
 
         /* el batec: clic, juntura, silenci... i llavors es resol */
@@ -170,20 +176,67 @@ const Main = (() => {
     Celebracio.init();
     Registre.init();
 
+    MotorRoda = Anim;
     refrescaRoda();
-    Anim.redimensiona();
+    MotorRoda.redimensiona();
     /* el primer càlcul de mida pot arribar abans que la graella assenti */
-    requestAnimationFrame(() => Anim.redimensiona());
+    requestAnimationFrame(() => MotorRoda.redimensiona());
     /* quan arriben les fonts del CDN, la roda es redibuixa amb elles */
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => Anim.reconstrueix());
+      document.fonts.ready.then(() => MotorRoda.reconstrueix());
     }
+
+    /* Three.js es carrega mandrosament DESPRÉS d'arrencar: la pàgina
+       apareix a l'instant amb la roda 2D i puja a 3D quan el mòdul
+       arriba. Qualsevol fallada deixa la roda 2D al seu lloc. */
+    function activa3D() {
+      if (!Anim3D.disponible() || MotorRoda === Anim3D) return;
+      /* mai a mitja tirada: s'espera al repòs */
+      if (estat !== 'repos') { setTimeout(activa3D, 1500); return; }
+      try {
+        Anim3D.init({
+          stage: document.getElementById('escenari'),
+          mon: document.getElementById('mon3d'),
+        });
+        Anim3D.reconstrueix(roda);
+        document.body.classList.add('mode-3d');
+        MotorRoda = Anim3D;
+        Anim3D.redimensiona();
+      } catch (e) {
+        document.body.classList.remove('mode-3d');
+        MotorRoda = Anim;
+        MotorRoda.redimensiona();
+      }
+    }
+    (async () => {
+      try {
+        const THREE = await import('three');
+        const [amb, com, ren, flor, sor] = await Promise.all([
+          import('three/addons/environments/RoomEnvironment.js'),
+          import('three/addons/postprocessing/EffectComposer.js'),
+          import('three/addons/postprocessing/RenderPass.js'),
+          import('three/addons/postprocessing/UnrealBloomPass.js'),
+          import('three/addons/postprocessing/OutputPass.js'),
+        ]);
+        window.THREE = THREE;
+        window.THREE_ADDONS = {
+          RoomEnvironment: amb.RoomEnvironment,
+          EffectComposer: com.EffectComposer,
+          RenderPass: ren.RenderPass,
+          UnrealBloomPass: flor.UnrealBloomPass,
+          OutputPass: sor.OutputPass,
+        };
+        activa3D();
+      } catch (e) {
+        /* sense connexió: la roda 2D es queda, en silenci */
+      }
+    })();
 
     let timerMida = 0;
     window.addEventListener('resize', () => {
       clearTimeout(timerMida);
       timerMida = setTimeout(() => {
-        Anim.redimensiona();
+        MotorRoda.redimensiona();
         Particules.redimensiona();
       }, 140);
     });

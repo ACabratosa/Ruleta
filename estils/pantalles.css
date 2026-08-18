@@ -1427,3 +1427,8 @@ body.mode-calma #app.aberracio { filter: none; }
   #cnvRoda.mou { filter: none; }
   #app.aberracio { filter: none; }
 }
+
+/* ─── Roda Three.js: el llenç ocupa l'escenari i el pla 2D es retira ─── */
+#mon3d { position: relative; }
+#cnv3d { position: absolute; inset: 0; display: block; }
+body.mode-3d #plaRoda { display: none; }

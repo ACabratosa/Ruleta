@@ -17,8 +17,10 @@
 <link rel="stylesheet" href="estils/base.css">
 <link rel="stylesheet" href="estils/pantalles.css">
 
-<!-- Three.js com a mòdul ES: si carrega, la roda es renderitza en 3D
-     real (PBR, llums, ombres, bloom); si falla, res no es trenca. -->
+<!-- Three.js es resol amb aquest importmap, però es carrega MANDROSAMENT
+     des de js/main.js després d'arrencar: així la pàgina apareix a
+     l'instant (roda 2D) i puja a 3D quan el mòdul arriba. Si no hi ha
+     connexió, la roda 2D es queda i res no es trenca. -->
 <script type="importmap">
 {
   "imports": {
@@ -26,21 +28,6 @@
     "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
   }
 }
-</script>
-<script type="module">
-  try {
-    const THREE = await import('three');
-    const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
-    const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
-    const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
-    const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
-    const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
-    window.THREE = THREE;
-    window.THREE_ADDONS = { RoomEnvironment, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
-  } catch (e) {
-    /* sense connexió: la roda 2D pren el relleu en silenci */
-  }
-  window.dispatchEvent(new Event('three-llest'));
 </script>
 </head>
 <body>

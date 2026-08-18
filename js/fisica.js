@@ -10,11 +10,11 @@ const Fisica = (() => {
 
   /* Radis com a fracció de R — la geometria canònica de la taula */
   const RD = {
-    ext: 0.985, llautoInt: 0.905, pistaInt: 0.80, bola: 0.853,
-    davantalInt: 0.695, deflector: 0.748,
-    nomExt: 0.688, nomInt: 0.552,
-    cellaExt: 0.552, cellaInt: 0.418, num: 0.508, repos: 0.472,
-    con: 0.418, torreta: 0.30, eix: 0.115,
+    ext: 0.985, llautoInt: 0.912, pistaInt: 0.822, bola: 0.870,
+    davantalInt: 0.728, deflector: 0.778,
+    nomExt: 0.722, nomInt: 0.548,
+    cellaExt: 0.548, cellaInt: 0.388, num: 0.478, repos: 0.452,
+    con: 0.388, torreta: 0.26, eix: 0.104,
   };
 
   /* ─── utilitats de perfil ───
